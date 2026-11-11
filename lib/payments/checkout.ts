@@ -31,11 +31,15 @@ export async function createClientToken(): Promise<string> {
   return response.clientToken;
 }
 
-function toLineItems(lines: PricedLine[]) {
+/** The payments API limits line item names to 35 characters and product codes to 12. */
+export const LINE_NAME_LIMIT = 35;
+export const PRODUCT_CODE_LIMIT = 12;
+
+export function toLineItems(lines: PricedLine[]) {
   return lines.map((line) => ({
     kind: "debit" as const,
-    name: line.name,
-    productCode: line.id,
+    name: line.name.slice(0, LINE_NAME_LIMIT),
+    productCode: line.id.slice(0, PRODUCT_CODE_LIMIT),
     quantity: String(line.quantity),
     unitAmount: centsToAmount(line.unitCents),
     totalAmount: centsToAmount(line.totalCents),
