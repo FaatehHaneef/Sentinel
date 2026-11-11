@@ -15,6 +15,8 @@ export type Character = {
   motto: string;
   /** What this character checks, in plain words. */
   checks: readonly string[];
+  /** True once this character's checks are built and it can join a trial. */
+  ready: boolean;
   /** Accent colour token from the dusk palette. */
   accent: "amber" | "ember" | "moss" | "mist" | "rose" | "parchment";
 };
@@ -32,6 +34,7 @@ export const CAST: readonly Character[] = [
       "Button legibility",
       "Meaning shown by colour alone",
     ],
+    ready: true,
     accent: "amber",
   },
   {
@@ -46,6 +49,7 @@ export const CAST: readonly Character[] = [
       "Risky buttons side by side",
       "Controls that need precision",
     ],
+    ready: false,
     accent: "moss",
   },
   {
@@ -61,6 +65,7 @@ export const CAST: readonly Character[] = [
       "Images that hold things up",
       "Feedback while waiting",
     ],
+    ready: false,
     accent: "mist",
   },
   {
@@ -76,6 +81,7 @@ export const CAST: readonly Character[] = [
       "Controls that answer to Enter and Space",
       "Dialogs that hold focus",
     ],
+    ready: false,
     accent: "parchment",
   },
   {
@@ -91,6 +97,7 @@ export const CAST: readonly Character[] = [
       "Page language and title",
       "Errors that get announced",
     ],
+    ready: false,
     accent: "rose",
   },
   {
@@ -106,6 +113,7 @@ export const CAST: readonly Character[] = [
       "Keyboards and autofill that help",
       "Stalls while tapping",
     ],
+    ready: false,
     accent: "ember",
   },
   {
@@ -120,6 +128,7 @@ export const CAST: readonly Character[] = [
       "Real buttons and links",
       "Placing a sandbox order",
     ],
+    ready: false,
     accent: "amber",
   },
 ];
