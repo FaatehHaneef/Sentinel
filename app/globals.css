@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Dusk palette. Measured contrast against the darkest and lightest points of
+ * the page background (#12152a to #2a2748):
+ *   parchment 14.9 to 11.7, mist 7.0 to 5.5, amber 10.1 to 8.0,
+ *   moss 6.8 to 5.4, ember 6.0 to 4.7, rose 5.0 to 3.9.
+ * Rose is below 4.5:1 at the light end, so it is used for large text only.
+ * Indigo on amber (buttons) is 9.0.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-indigo: #1b1f3b;
+  --color-night: #12152a;
+  --color-slate: #2e3a5c;
+  --color-mist: #8fa3bf;
+  --color-amber: #ffb347;
+  --color-ember: #e8743b;
+  --color-moss: #6fae75;
+  --color-parchment: #f3e9d2;
+  --color-rose: #e05a6d;
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-pixel);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-night);
+  color: var(--color-parchment);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 100%, #3a2f52 0%, transparent 70%),
+    linear-gradient(180deg, var(--color-night) 0%, var(--color-indigo) 60%, #2a2748 100%);
+  background-attachment: fixed;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/* Crisp edges for pixel art. */
+.pixelated {
+  image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
