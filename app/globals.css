@@ -19,6 +19,14 @@
   --color-parchment: #f3e9d2;
   --color-rose: #e05a6d;
 
+  /* Tallowmere, the demo store: warm paper and ink. */
+  --color-paper: #f7f1e3;
+  --color-card: #fffaf0;
+  --color-ink: #2b2118;
+  --color-ink-soft: #5c4a3a;
+  --color-wax: #8a3b12;
+  --color-line: #d9cbb0;
+
   --font-sans: var(--font-body);
   --font-display: var(--font-pixel);
 }
