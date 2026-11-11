@@ -1,0 +1,20 @@
+# Working documents, kept local until the master plan is ready to publish
+docs/
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Secrets: never commit real keys
+.env
+.env.*
+!.env.example
+
+# Tooling and OS
+.vercel/
+*.log
+.DS_Store
+Thumbs.db
