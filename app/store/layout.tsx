@@ -29,6 +29,11 @@ export default function StoreLayout({ children }: LayoutProps<"/store">) {
       <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
         {children}
       </main>
+      {/*
+        The Sentinel loader, added the same way any site owner would add it.
+        It does nothing for ordinary visitors.
+      */}
+      <script src="/v.js" data-site="tallowmere" async />
       <footer className="border-t border-line px-4 py-6 text-center text-sm text-ink-soft">
         Tallowmere is a fictional shop built to be tested.{" "}
         <Link href="/" className="underline underline-offset-4">
