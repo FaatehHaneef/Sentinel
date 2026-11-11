@@ -18,3 +18,7 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
