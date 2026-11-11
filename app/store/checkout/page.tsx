@@ -67,12 +67,13 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  async function pay() {
-    if (!dropin.current || paying) return;
+  /** Pays with the payment form, or with the sandbox's built-in test payment when given. */
+  async function pay(sandboxNonce?: string) {
+    if (paying || (!sandboxNonce && !dropin.current)) return;
     setPaying(true);
     setMessage("");
     try {
-      const { nonce } = await dropin.current.requestPaymentMethod();
+      const nonce = sandboxNonce ?? (await dropin.current!.requestPaymentMethod()).nonce;
       checkoutId.current ??= crypto.randomUUID();
       const response = await fetch("/api/checkout/pay", {
         method: "POST",
@@ -94,7 +95,7 @@ export default function CheckoutPage() {
       }
       if (result.reason === "declined") {
         checkoutId.current = null;
-        dropin.current.clearSelectedPaymentMethod();
+        dropin.current?.clearSelectedPaymentMethod();
       }
       setMessage(result.message);
     } catch {
@@ -168,7 +169,7 @@ export default function CheckoutPage() {
           <h2 className="font-display text-2xl font-bold">Payment</h2>
           <p className="rounded border border-line bg-card p-3 text-sm">
             This is a sandbox. Use the test card <strong>4111 1111 1111 1111</strong> with any
-            future expiry date.
+            future expiry date, or press the sandbox test card button to skip the typing.
           </p>
           <div ref={container} />
           {!formReady && !message ? <p>Loading the payment form…</p> : null}
@@ -178,11 +179,19 @@ export default function CheckoutPage() {
           <div className="flex flex-wrap items-center gap-4">
             <button
               type="button"
-              onClick={pay}
+              onClick={() => pay()}
               disabled={!formReady || paying}
               className="rounded bg-wax px-6 py-3 text-lg font-bold text-card hover:bg-ink disabled:opacity-60"
             >
               {paying ? "Paying…" : `Pay ${formatPrice(totalCents)}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => pay("fake-valid-nonce")}
+              disabled={paying}
+              className="rounded border-2 border-wax px-4 py-3 font-bold text-wax hover:bg-card disabled:opacity-60"
+            >
+              Pay with the sandbox test card
             </button>
             <button
               type="button"
