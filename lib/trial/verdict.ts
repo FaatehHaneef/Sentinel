@@ -99,6 +99,16 @@ const WHY: Record<string, string> = {
     "Small text cannot be made out without zooming, and zooming breaks the flow of buying. Use a larger size.",
   "iris.labels":
     "A placeholder disappears as soon as typing starts, so the shopper loses track of what the box is for. Add a label that stays visible above the field.",
+  "tobin.target-size":
+    "A shaking hand cannot land on something this small. Make the control at least 44 pixels in each direction.",
+  "tobin.spacing":
+    "When controls sit this close together, a slip lands on the neighbour. Leave more room between them.",
+  "tobin.risky-neighbour":
+    "A control that removes or cancels sits right beside one the shopper needs, so a slip undoes their work. Move it further away.",
+  "tobin.miss-rate":
+    "Most attempts to press this miss, and every miss is a moment where the shopper may give up. A larger control fixes it.",
+  "tobin.precision":
+    "A slider has to be held steady and dragged, which a trembling hand cannot do. Offer buttons or a number box as well.",
   "iris.button":
     "A button that barely differs from the page is easy to miss altogether. Give it a visible edge or a stronger colour.",
 };
