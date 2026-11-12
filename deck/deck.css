@@ -1,0 +1,364 @@
+:root {
+  --night: #12152a;
+  --indigo: #1b1f3b;
+  --slate: #2e3a5c;
+  --mist: #8fa3bf;
+  --amber: #ffb347;
+  --ember: #e8743b;
+  --moss: #6fae75;
+  --parchment: #f3e9d2;
+  --rose: #e05a6d;
+}
+
+* {
+  box-sizing: border-box;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--night);
+  color: var(--parchment);
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Every slide is 16:9, scaled to fit the window. */
+.slide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 720px;
+  transform: translate(-50%, -50%) scale(var(--fit, 1));
+  padding: 64px 80px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 110%, #3a2f52 0%, transparent 70%),
+    linear-gradient(180deg, var(--night) 0%, var(--indigo) 65%, #2a2748 100%);
+  border: 6px solid var(--slate);
+  box-shadow: 10px 10px 0 #090a15;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+  overflow: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.kicker {
+  margin: 0;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: "Pixelify Sans", monospace;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+}
+
+h1 {
+  font-size: 120px;
+  line-height: 1;
+}
+
+h2 {
+  font-size: 44px;
+  line-height: 1.15;
+  max-width: 1050px;
+}
+
+h3 {
+  font-size: 26px;
+  color: var(--amber);
+}
+
+p,
+li {
+  font-size: 22px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+li::marker {
+  color: var(--amber);
+}
+
+figure {
+  margin: 0;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  border: 4px solid var(--slate);
+  box-shadow: 8px 8px 0 #090a15;
+  image-rendering: auto;
+}
+
+figcaption {
+  margin-top: 12px;
+  font-size: 19px;
+  color: var(--mist);
+}
+
+.card {
+  background: var(--indigo);
+  border: 4px solid var(--slate);
+  box-shadow: 6px 6px 0 #090a15;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.three {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.closing {
+  margin-top: 48px;
+  font-size: 26px;
+  color: var(--amber);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: 48px;
+}
+
+.split > div {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stat {
+  font-family: "Pixelify Sans", monospace;
+  font-size: 64px;
+  color: var(--amber);
+  line-height: 1;
+}
+
+.stat small {
+  display: block;
+  margin-top: 8px;
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-size: 18px;
+  color: var(--mist);
+}
+
+.wide {
+  margin-top: auto;
+  max-height: 300px;
+  overflow: hidden;
+  border: 4px solid var(--slate);
+  box-shadow: 8px 8px 0 #090a15;
+}
+
+.wide img {
+  border: 0;
+  box-shadow: none;
+}
+
+.two-shots .shots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 12px;
+}
+
+.before-after {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.before-after .label {
+  margin-top: 10px;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 20px;
+  color: var(--amber);
+}
+
+.before-after .from {
+  color: var(--rose);
+  font-weight: 700;
+}
+
+.before-after .to {
+  color: var(--moss);
+  font-weight: 700;
+}
+
+.wide.tall {
+  height: 380px;
+  max-height: none;
+}
+
+.wide.tall img {
+  height: 100%;
+  object-fit: cover;
+  object-position: center var(--focus, 50%);
+}
+
+.flow {
+  list-style: none;
+  margin: auto 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+}
+
+.flow li {
+  flex: 1;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 17px;
+  line-height: 1.2;
+  text-align: center;
+  padding: 14px 8px;
+  background: var(--indigo);
+  border: 3px solid var(--amber);
+  color: var(--parchment);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow li + li {
+  margin-left: 26px;
+  position: relative;
+}
+
+.flow li + li::before {
+  content: "→";
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--amber);
+  font-size: 20px;
+}
+
+/* Title slides: the dusk market behind. */
+.title-slide {
+  justify-content: center;
+  padding: 0;
+}
+
+.title-slide .backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  opacity: 0.75;
+}
+
+.title-copy {
+  position: relative;
+  padding: 80px;
+  background: linear-gradient(
+    90deg,
+    rgba(18, 21, 42, 0.92) 0%,
+    rgba(18, 21, 42, 0.6) 60%,
+    transparent 100%
+  );
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.title-copy .lead {
+  font-size: 32px;
+  max-width: 760px;
+}
+
+.note {
+  color: var(--mist);
+  font-size: 18px;
+}
+
+.counter {
+  position: fixed;
+  right: 18px;
+  bottom: 10px;
+  margin: 0;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 14px;
+  color: var(--mist);
+}
+
+/* Printing: one slide per page, all visible. */
+@media print {
+  @page {
+    size: 1280px 720px;
+    margin: 0;
+  }
+  html,
+  body {
+    overflow: visible;
+    height: auto;
+  }
+  .deck {
+    width: auto;
+    height: auto;
+  }
+  .slide {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    opacity: 1;
+    page-break-after: always;
+    box-shadow: none;
+    border: 0;
+  }
+  .counter {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+  }
+}
