@@ -184,7 +184,7 @@ without one, Sentinel uses its built-in notes.
 ## Tests
 
 ```bash
-npm run check          # lint, type checks and 98 unit tests
+npm run check          # lint, type checks and 100 unit tests
 npm run build && npm run e2e   # 24 browser tests that walk real trials end to end
 ```
 

@@ -60,6 +60,7 @@ export async function generateJson<T>(
   let lastProblem = "No AI key is configured.";
 
   for (const model of models()) {
+    let overloaded = 0;
     for (const key of orderedKeys(Date.now())) {
       const remaining = deadline - Date.now();
       if (remaining < 2_000) throw new AiUnavailableError("AI did not answer in time.");
@@ -94,7 +95,10 @@ export async function generateJson<T>(
       }
       if (!response.ok) {
         lastProblem = `${model} answered with status ${response.status}.`;
-        break; // Overloaded or retired model: move on to the next model.
+        // A busy model often answers the next request: give it one more try
+        // before moving on. A retired model (404) will not, so move on at once.
+        if (response.status >= 500 && ++overloaded < 2) continue;
+        break;
       }
 
       try {
