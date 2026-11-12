@@ -48,7 +48,7 @@ export function StoreProgress({ runId }: { runId?: string }) {
         <div>
           <p className="font-display text-sm uppercase tracking-widest text-amber">Store level</p>
           <p className="font-display text-3xl font-bold text-parchment">
-            {level.level}. {level.rank}
+            Level <span className="font-sans">{level.level}</span>: {level.rank}
           </p>
         </div>
         <p className="text-mist">
@@ -70,7 +70,10 @@ export function StoreProgress({ runId }: { runId?: string }) {
       </div>
 
       <h2 className="font-display mt-6 text-xl font-bold text-parchment">
-        Achievements ({earned.size} of {ACHIEVEMENTS.length})
+        Achievements{" "}
+        <span className="font-sans text-lg font-normal text-mist">
+          ({earned.size} of {ACHIEVEMENTS.length})
+        </span>
       </h2>
       <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ACHIEVEMENTS.map((achievement) => {

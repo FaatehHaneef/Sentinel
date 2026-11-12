@@ -10,9 +10,17 @@ export const metadata: Metadata = {
 export default function LobbyPage() {
   return (
     <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-12">
-      <Link href="/" className="text-mist underline underline-offset-4 hover:text-parchment">
-        Back to the road
-      </Link>
+      <nav className="flex flex-wrap gap-6">
+        <Link href="/" className="text-mist underline underline-offset-4 hover:text-parchment">
+          Back to the road
+        </Link>
+        <Link
+          href="/ledger"
+          className="text-mist underline underline-offset-4 hover:text-parchment"
+        >
+          The ledger
+        </Link>
+      </nav>
       <h1 className="font-display mt-6 text-4xl font-bold text-parchment sm:text-5xl">
         Choose your shoppers
       </h1>

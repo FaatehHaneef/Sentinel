@@ -446,6 +446,9 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
         <Link href="/lobby" className="font-bold text-amber underline underline-offset-4">
           Start a new trial
         </Link>
+        <Link href="/ledger" className="font-bold text-amber underline underline-offset-4">
+          The ledger
+        </Link>
         {chosen.length > 0 ? (
           <p className="w-full text-sm text-mist">
             The fixes are tried on the page in your browser only. Nothing on the shop is changed.
