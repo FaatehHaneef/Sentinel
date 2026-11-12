@@ -1,4 +1,5 @@
 import { getCharacter, type CharacterId } from "@/lib/cast";
+import { plainProblem } from "./plain";
 import type { RunRecord, Severity } from "./types";
 
 /**
@@ -14,6 +15,8 @@ export type LedgerRow = {
   shopper: string;
   page: string;
   check: string;
+  /** The problem in plain words. */
+  problem: string;
   element: string;
   severity: Severity;
   neededToBuy: boolean;
@@ -76,6 +79,7 @@ export function buildLedger(records: readonly RunRecord[]): LedgerRow[] {
         shopper: getCharacter(event.character).name,
         page: names[event.scene] ?? event.scene,
         check: event.title,
+        problem: plainProblem(event.finding.check),
         element: event.finding.label,
         severity: event.finding.severity,
         neededToBuy: event.finding.onPath,
