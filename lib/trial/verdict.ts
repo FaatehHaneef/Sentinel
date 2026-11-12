@@ -135,6 +135,12 @@ const WHY: Record<string, string> = {
     "Things move while the page loads, so a shopper who is reading or tapping finds the page has moved under them. Reserve space for what loads late.",
   "pell.lazy-images":
     "This picture loads before the shopper can see it, slowing down everything above it. Let it load when it is about to be seen.",
+  "cog.product-data":
+    "AI shopping agents read structured product data, not pictures and layout. Without a name, price and stock they can rely on, they will not buy. Publish the product as schema.org data in the page.",
+  "cog.price-match":
+    "The price in the product data and the price on the page disagree, and a careful agent will not pay a price it cannot confirm. Keep them in step.",
+  "cog.real-controls":
+    "This is needed to buy but is not a real button or link, so an agent cannot tell that it does anything. Use a real button.",
   "iris.button":
     "A button that barely differs from the page is easy to miss altogether. Give it a visible edge or a stronger colour.",
 };

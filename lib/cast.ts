@@ -118,12 +118,11 @@ export const CAST: readonly Character[] = [
     motto: "Show me the data and I will do the rest.",
     checks: [
       "Product data a machine can read",
-      "Price that matches the page",
-      "A findable path to checkout",
-      "Real buttons and links",
-      "Placing a sandbox order",
+      "Price in the data that matches the page",
+      "Real buttons and links on the way to buy",
+      "Places a sandbox order through an AI agent",
     ],
-    ready: false,
+    ready: true,
     accent: "amber",
   },
 ];
