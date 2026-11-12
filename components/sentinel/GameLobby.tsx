@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { CAST, type Character, type CharacterId } from "@/lib/cast";
 import { writeStoreFixes } from "@/lib/store/variants";
 import { Sprite } from "./Sprite";
+import { UseCases } from "./UseCases";
 
 type Stage = "circle" | "walking" | "line";
 
@@ -79,6 +80,7 @@ export function GameLobby({ start = "circle" }: { start?: "circle" | "line" }) {
   const [focus, setFocus] = useState<CharacterId>("iris");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
+  const [showCases, setShowCases] = useState(false);
 
   const field = useRef<HTMLDivElement>(null);
   const figures = useRef<(HTMLDivElement | null)[]>([]);
@@ -178,6 +180,40 @@ export function GameLobby({ start = "circle" }: { start?: "circle" | "line" }) {
 
   return (
     <div>
+      {stage !== "circle" ? (
+        <>
+          <nav className="mb-6 flex flex-wrap gap-3" aria-label="Lobby">
+            {start === "circle" ? (
+              <button
+                type="button"
+                className="pixel-button quiet"
+                onClick={() => setStage("circle")}
+              >
+                Back to the road
+              </button>
+            ) : (
+              <Link href="/" className="pixel-button quiet">
+                Back to the road
+              </Link>
+            )}
+            <button
+              type="button"
+              className="pixel-button quiet"
+              aria-expanded={showCases}
+              onClick={() => setShowCases((open) => !open)}
+            >
+              Who it&apos;s for
+            </button>
+            <Link href="/ledger" className="pixel-button quiet">
+              The ledger
+            </Link>
+            <Link href="/sites" className="pixel-button quiet">
+              Try it on your own site
+            </Link>
+          </nav>
+          {showCases ? <UseCases /> : null}
+        </>
+      ) : null}
       <div
         ref={field}
         className="relative w-full transition-[height] duration-700"
@@ -330,17 +366,6 @@ export function GameLobby({ start = "circle" }: { start?: "circle" | "line" }) {
             </p>
           </section>
         </div>
-      ) : null}
-
-      {stage !== "circle" ? (
-        <nav className="mt-6 flex flex-wrap gap-3">
-          <Link href="/ledger" className="pixel-button quiet">
-            The ledger
-          </Link>
-          <Link href="/sites" className="pixel-button quiet">
-            Try it on your own site
-          </Link>
-        </nav>
       ) : null}
     </div>
   );

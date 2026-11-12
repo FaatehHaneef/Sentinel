@@ -34,3 +34,22 @@ test("the lobby address opens straight in the line", async ({ page }) => {
   await expect(page.getByRole("checkbox")).toHaveCount(7);
   await expect(page.getByRole("button", { name: "Start your trial" })).toHaveCount(0);
 });
+
+test("the line has a way back to the circle and shows who Sentinel is for", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start your trial" }).click();
+  await expect(page.getByRole("checkbox")).toHaveCount(7, { timeout: 10_000 });
+
+  await page.getByRole("button", { name: "Who it's for" }).click();
+  await expect(page.getByRole("heading", { name: "A small shop owner" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /results summary/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Back to the road" }).click();
+  await expect(page.getByRole("button", { name: "Start your trial" })).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+
+  // The separate lobby address has the same bar.
+  await page.goto("/lobby");
+  await expect(page.getByRole("link", { name: "Back to the road" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Who it's for" })).toBeVisible();
+});
