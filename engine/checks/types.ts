@@ -3,6 +3,8 @@ import type { Finding, Severity } from "@/lib/trial/types";
 /** A finding together with the element it was measured on. */
 export type Located = Finding & {
   element: Element;
+  /** What the character says about this finding, when it depends on the element. */
+  line?: string;
   /** Where simulated taps landed, in viewport coordinates, for showing on the page. */
   taps?: { x: number; y: number; hit: boolean }[];
 };
@@ -15,6 +17,8 @@ export type CheckResult = {
   /** How serious a failure of this check is, which sets the XP for passing it. */
   weight: Severity;
   findings: Located[];
+  /** True when the check could not be measured this time. It then counts as neither a pass nor a snag. */
+  skipped?: boolean;
 };
 
 export type CheckContext = {

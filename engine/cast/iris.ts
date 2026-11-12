@@ -6,7 +6,7 @@ export const iris: EngineCharacter = {
   id: "iris",
   frames: IRIS_FRAMES,
   palette: IRIS_PALETTE,
-  lensLabel: "See as Iris",
+  lens: { label: "See as Iris", kind: "blur" },
   checks: runIrisChecks,
   lines: {
     "iris.contrast": "This writing is too faint for me, dear.",

@@ -1,5 +1,6 @@
 import type { Character } from "@/lib/cast";
 import type { Sfx } from "../audio/sfx";
+import type { Lens } from "../cast/types";
 import type { Clock } from "../core/clock";
 import { HUD_TAG } from "../core/dom";
 import { Stage } from "./stage";
@@ -154,10 +155,14 @@ export class Hud {
     return button;
   }
 
-  setCharacter(character: Character, lensLabel: string): void {
+  setCharacter(character: Character, lens?: Lens): void {
     this.nameText.textContent = character.name;
     this.roleText.textContent = character.represents;
-    this.lensButton.textContent = lensLabel;
+    // The lens is switched off between characters, and hidden for those without one.
+    this.lens.className = `lens ${lens?.kind ?? ""}`;
+    this.lensButton.setAttribute("aria-pressed", "false");
+    this.lensButton.hidden = !lens;
+    this.lensButton.textContent = lens?.label ?? "";
   }
 
   setMeters(meters: { coins: number; patience: number; xp: number }): void {

@@ -6,7 +6,6 @@ export const tobin: EngineCharacter = {
   id: "tobin",
   frames: TOBIN_FRAMES,
   palette: TOBIN_PALETTE,
-  lensLabel: "See as Tobin",
   checks: runTobinChecks,
   lines: {
     "tobin.target-size": "My hands shake, you see. I can't land on something that small.",

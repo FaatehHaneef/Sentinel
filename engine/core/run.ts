@@ -11,7 +11,9 @@ import type { Finding, Outcome, TrialEvent } from "@/lib/trial/types";
 import { buildSprite } from "../art/sprite";
 import { Sfx } from "../audio/sfx";
 import { iris } from "../cast/iris";
+import { knock } from "../cast/knock";
 import { tobin } from "../cast/tobin";
+import { echo } from "../cast/echo";
 import type { EngineCharacter } from "../cast/types";
 import type { Located } from "../checks/types";
 import { Hud } from "../hud/hud";
@@ -29,7 +31,7 @@ import {
   type PreviousSnag,
 } from "./state";
 
-const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris, tobin };
+const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris, tobin, knock, echo };
 
 /** How long the character lingers on a snag, in trial time. */
 const SNAG_PAUSE_MS = 1500;
@@ -146,7 +148,7 @@ async function walk(
   const meta = getCharacter(character.id);
   const stage = hud.stage;
   stage.setSprite(buildSprite(character.frames, character.palette));
-  hud.setCharacter(meta, character.lensLabel);
+  hud.setCharacter(meta, character.lens);
 
   if (!state.progress) {
     journey.prepare();
@@ -235,7 +237,7 @@ async function walk(
   }
 
   const reportSnag = async (scene: Scene, located: Located, title: string): Promise<void> => {
-    const { element, taps, ...finding } = located;
+    const { element, taps, line: spoken, ...finding } = located;
     if (element.isConnected) {
       await goTo(element);
       hud.highlight(element, true);
@@ -247,7 +249,7 @@ async function walk(
     const patience = patienceCost(finding);
     progress.coins -= coins;
     progress.patience = Math.max(0, progress.patience - patience);
-    const line = character.lines[finding.check] ?? "";
+    const line = spoken ?? character.lines[finding.check] ?? "";
 
     emit({
       type: "snag",
@@ -311,9 +313,11 @@ async function walk(
     stage.setAnimation("idle");
   };
 
-  const inspect = async (scene: Scene): Promise<void> => {
+  /** Checks the page. Returns the description of an element this shopper cannot use at all, if there is one on their path. */
+  const inspect = async (scene: Scene): Promise<string | null> => {
     await settle(200, 1500);
-    applier.addLabels();
+    applier.apply();
+    let barrier: string | null = null;
     const results = character.checks({
       pathElements: scene.path(character.shopper),
       seed: state.config.seed,
@@ -325,10 +329,11 @@ async function walk(
     const failing = new Set<string>();
     const cleanChecks: typeof results = [];
     for (const result of results) {
-      if (result.findings.length === 0) cleanChecks.push(result);
+      if (result.findings.length === 0 && !result.skipped) cleanChecks.push(result);
       for (const located of result.findings) {
         const key = `${located.check}|${located.selector}`;
         failing.add(key);
+        if (located.stops && located.onPath) barrier ??= located.label;
         // Furniture that repeats on every page (header, footer) is reported the first time only.
         if (progress.seen.includes(key)) continue;
         progress.seen.push(key);
@@ -370,6 +375,7 @@ async function walk(
       refresh();
       await clock.sleep(PASS_PAUSE_MS);
     }
+    return barrier;
   };
 
   const finish = (outcome: Outcome): void => {
@@ -406,11 +412,12 @@ async function walk(
       return;
     }
     currentScene = scene.id;
+    let barrier: string | null = null;
 
     if (!progress.checked.includes(scene.id)) {
       emit({ type: "scene", scene: scene.id, path: window.location.pathname, title: scene.name });
       hud.feed({ kind: "info", text: `Arrives at: ${scene.name}` });
-      await inspect(scene);
+      barrier = await inspect(scene);
       progress.checked.push(scene.id);
       saveState(state);
     }
@@ -426,6 +433,11 @@ async function walk(
       refresh();
       await clock.sleep(1800);
       finish("purchased");
+      return;
+    }
+
+    if (barrier) {
+      await abandon(scene.id, `could not use the ${barrier}`);
       return;
     }
 
