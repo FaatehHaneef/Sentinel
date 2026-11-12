@@ -20,6 +20,9 @@ export default function LobbyPage() {
         >
           The ledger
         </Link>
+        <Link href="/sites" className="text-mist underline underline-offset-4 hover:text-parchment">
+          Try it on your own site
+        </Link>
       </nav>
       <h1 className="font-display mt-6 text-4xl font-bold text-parchment sm:text-5xl">
         Choose your shoppers

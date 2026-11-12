@@ -14,7 +14,7 @@ const hex = z.string().regex(/^#[0-9a-f]{6}$/i);
 
 export const verdictRequestSchema = z.object({
   character: z.enum(["iris", "tobin", "pell", "knock", "echo", "dash", "cog"]),
-  outcome: z.enum(["purchased", "abandoned", "stopped", "running"]),
+  outcome: z.enum(["purchased", "abandoned", "stopped", "observed", "running"]),
   /** Display name of the scene where the shopper gave up. */
   abandonedAt: z.string().max(60).optional(),
   purse: z.number().min(0).max(1_000_000),
@@ -193,6 +193,17 @@ export function builtInVerdict(request: VerdictRequest): Verdict {
         : "") +
       `The whole purse of ${request.purse} coins was lost with the sale.` +
       fixed;
+  } else if (request.outcome === "observed") {
+    headline =
+      count === 0
+        ? `${name} found nothing in the way on this page`
+        : `${name} found ${plural(count, "snag")} on this page`;
+    story =
+      (count === 0
+        ? `${first} looked over the page and found nothing that would get in the way.`
+        : `${first} looked over the page and found ${plural(count, "snag")}` +
+          (needed > 0 ? `, ${needed} of them on things a shopper has to use` : "") +
+          ". On your own site the shoppers only look: they never click, type or pay.") + fixed;
   } else {
     headline = `${name}'s trial ended early`;
     story =

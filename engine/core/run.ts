@@ -1,6 +1,7 @@
 import { getCharacter, type CharacterId } from "@/lib/cast";
 import { writeStoreFixes } from "@/lib/store/variants";
 import { levelFor, newlyEarned, readAllRecords, totalXp } from "@/lib/trial/progress";
+import { encodeRecord, RECORD_FRAGMENT } from "@/lib/trial/transfer";
 import {
   coinCost,
   passXp,
@@ -93,7 +94,7 @@ export async function runTrial(
 
   const finishRun = (title: string): void => {
     state.finished = true;
-    saveRecord(state, true, applier.applied);
+    const record = saveRecord(state, true, applier.applied);
     clearState();
     applier.stop();
     // Store fixes last for one trial: afterwards the demo store goes back to how it was.
@@ -121,7 +122,14 @@ export async function runTrial(
         `${snags} ${snags === 1 ? "snag" : "snags"} found` +
         (fixed > 0 ? `, ${fixed} fixed since last time. ` : ". ") +
         `Store level ${level.level}: ${level.rank}.`,
-      { href: `${apiBase}/runs/${state.config.runId}`, label: "See the full results" },
+      {
+        // From an owner's own site, the record travels back to Sentinel in the address fragment.
+        href:
+          state.config.kind === "own"
+            ? `${apiBase}/runs/${state.config.runId}`
+            : `${apiBase}/runs/${state.config.runId}#${RECORD_FRAGMENT}${encodeRecord(record)}`,
+        label: "See the full results",
+      },
     );
   };
 
@@ -492,6 +500,15 @@ async function walk(
 
     if (progress.patience <= 0) {
       await abandon(scene.id, `ran out of patience at "${scene.name}"`);
+      return;
+    }
+
+    if (journey.observeOnly) {
+      // On an owner's own site the shopper looks and reports, and goes no further.
+      hud.say("That's what I found on this page.");
+      hud.feed({ kind: "info", text: "Observed the page" });
+      await clock.sleep(900);
+      finish("observed");
       return;
     }
 

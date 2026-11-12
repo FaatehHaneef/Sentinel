@@ -132,7 +132,7 @@ export function clearState(): void {
 }
 
 /** Saves the run where the results page can read it. */
-export function saveRecord(state: EngineState, finished: boolean, fixes: AppliedFix[]): void {
+export function saveRecord(state: EngineState, finished: boolean, fixes: AppliedFix[]): RunRecord {
   const record: RunRecord = {
     config: state.config,
     startedAt: new Date(state.startedAt).toISOString(),
@@ -146,4 +146,5 @@ export function saveRecord(state: EngineState, finished: boolean, fixes: Applied
   } catch {
     // The results page will say it has no record.
   }
+  return record;
 }

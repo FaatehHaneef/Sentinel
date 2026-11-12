@@ -76,7 +76,8 @@ export type AppliedFix = {
   fix: Fix;
 };
 
-export type Outcome = "purchased" | "abandoned" | "stopped";
+/** observed: on an owner's own site, where shoppers only look and never buy. */
+export type Outcome = "purchased" | "abandoned" | "stopped" | "observed";
 
 type EventBody =
   | { type: "scene"; scene: string; path: string; title: string }
