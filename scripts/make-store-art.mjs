@@ -70,7 +70,8 @@ function scene() {
       if (d < 34) pixels[y][x] = mix(pixels[y][x], glow, Math.max(0, (34 - d) / 34) * 0.45);
     }
   }
-  for (let y = 40; y < 44; y++) for (let x = 140 - (44 - y); x < 180 + (44 - y); x++) pixels[y][x] = hex("#8a3b12");
+  for (let y = 40; y < 44; y++)
+    for (let x = 140 - (44 - y); x < 180 + (44 - y); x++) pixels[y][x] = hex("#8a3b12");
   for (let y = 44; y < 60; y++) {
     pixels[y][142] = hex("#3a2a20");
     pixels[y][177] = hex("#3a2a20");
@@ -81,7 +82,8 @@ function scene() {
     const x = 146 + i * 5;
     pixels[52][x] = hex("#fff6d6");
     pixels[53][x] = hex("#ffb347");
-    for (let y = 54; y < 56; y++) pixels[y][x] = [hex("#e8743b"), hex("#6fae75"), hex("#ffb347")][i % 3];
+    for (let y = 54; y < 56; y++)
+      pixels[y][x] = [hex("#e8743b"), hex("#6fae75"), hex("#ffb347")][i % 3];
   }
   // A string of lanterns across the sky.
   for (let x = 0; x < W; x += 9) {
@@ -151,4 +153,6 @@ const heavy = png(pixels, 8, 14, 1);
 const light = png(pixels, 5, 0, 9);
 writeFileSync("public/store/banner-heavy.png", heavy);
 writeFileSync("public/store/banner.png", light);
-console.log(`banner-heavy.png ${Math.round(heavy.length / 1024)} KB, banner.png ${Math.round(light.length / 1024)} KB`);
+console.log(
+  `banner-heavy.png ${Math.round(heavy.length / 1024)} KB, banner.png ${Math.round(light.length / 1024)} KB`,
+);
