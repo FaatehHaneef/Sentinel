@@ -18,6 +18,7 @@ import {
 } from "@/lib/trial/types";
 import { withSuggestedColour, type Verdict } from "@/lib/trial/verdict";
 import { RevenueEstimate, RevenueInputsForm } from "./RevenueEstimate";
+import { StoreProgress } from "./StoreProgress";
 import { sceneNames, useRunRecord, useVerdicts, type VerdictState } from "./useRunData";
 
 const SEVERITY_LABEL: Record<Severity, string> = {
@@ -413,6 +414,7 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
       </p>
 
       <div className="mt-8 space-y-6">
+        <StoreProgress runId={record.config.runId} />
         <AppliedFixes record={record} />
         <RevenueInputsForm inputs={inputs} onChange={setInputs} />
         {summaries.map((summary) => (
