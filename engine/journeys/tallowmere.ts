@@ -13,6 +13,9 @@ const productLink = () => document.querySelector<HTMLElement>(`a[href="${PRODUCT
 const addToCart = () => findByText<HTMLElement>("button", /^add to cart$/i);
 const viewCart = () => findByText<HTMLElement>("a", /^view cart$/i);
 const checkoutLink = () => document.querySelector<HTMLElement>('main a[href="/store/checkout"]');
+/** The control that adds one more of the item in the cart, and the number beside it. */
+const oneMore = () => findByText<HTMLElement>("main li div, main li button", /^\+$/);
+const quantityShown = () => Number(oneMore()?.previousElementSibling?.textContent ?? "0");
 const continueButton = () => findByText<HTMLElement>("button", /continue to payment/i);
 const paymentHeading = () => findByText("h2", /^payment$/i);
 const sandboxPay = () => findByText<HTMLButtonElement>("button", /sandbox test card/i);
@@ -24,7 +27,7 @@ function present<T>(items: (T | null)[]): T[] {
 }
 
 export const tallowmere: Journey = {
-  cartCents: 1800,
+  unitCents: 1800,
   startPath: "/store",
 
   prepare() {
@@ -69,8 +72,15 @@ export const tallowmere: Journey = {
       name: "Cart",
       funnel: 1,
       match: () => window.location.pathname === "/store/cart" && checkoutLink() !== null,
-      path: () => present([checkoutLink()]),
+      // A shopper who wants more than one has to use the quantity control.
+      path: (shopper) => present([shopper.quantity > 1 ? oneMore() : null, checkoutLink()]),
       async advance(actor) {
+        for (let have = quantityShown(); have > 0 && have < actor.shopper.quantity; have++) {
+          const control = oneMore();
+          if (!control) break;
+          await actor.click(control, "Asks for one more");
+          await actor.waitFor(() => quantityShown() > have, 3000);
+        }
         const link = checkoutLink();
         if (link) await actor.click(link, "Goes to checkout");
       },

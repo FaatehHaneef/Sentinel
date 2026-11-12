@@ -11,6 +11,7 @@ import type { Finding, Outcome, TrialEvent } from "@/lib/trial/types";
 import { buildSprite } from "../art/sprite";
 import { Sfx } from "../audio/sfx";
 import { iris } from "../cast/iris";
+import { tobin } from "../cast/tobin";
 import type { EngineCharacter } from "../cast/types";
 import type { Located } from "../checks/types";
 import { Hud } from "../hud/hud";
@@ -28,7 +29,7 @@ import {
   type PreviousSnag,
 } from "./state";
 
-const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris };
+const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris, tobin };
 
 /** How long the character lingers on a snag, in trial time. */
 const SNAG_PAUSE_MS = 1500;
@@ -149,7 +150,7 @@ async function walk(
 
   if (!state.progress) {
     journey.prepare();
-    const purse = purseFor(journey.cartCents);
+    const purse = purseFor(journey.unitCents * character.shopper.quantity);
     state.progress = {
       purse,
       coins: purse,
@@ -177,8 +178,10 @@ async function walk(
   const spotFor = (element: Element): { x: number; y: number } => {
     const rect = element.getBoundingClientRect();
     const half = 8 * SPRITE_SCALE;
-    const maxX = window.innerWidth - hud.reservedRight - half - 8;
-    const x = Math.max(half + 8, Math.min(rect.left - half - 10, maxX));
+    const reserved = hud.reserved;
+    const minX = reserved.left + half + 8;
+    const maxX = window.innerWidth - reserved.right - half - 8;
+    const x = Math.max(minX, Math.min(rect.left - half - 10, maxX));
     const y = Math.max(24 * SPRITE_SCALE + 8, Math.min(rect.bottom + 6, window.innerHeight - 12));
     return { x, y };
   };
@@ -232,12 +235,13 @@ async function walk(
   }
 
   const reportSnag = async (scene: Scene, located: Located, title: string): Promise<void> => {
-    const { element, ...finding } = located;
+    const { element, taps, ...finding } = located;
     if (element.isConnected) {
       await goTo(element);
       hud.highlight(element, true);
     }
-    stage.setAnimation(character.reactions[finding.check] ?? "squint");
+    stage.setAnimation(character.reactions[finding.check] ?? "worry");
+    if (taps) stage.showTaps(taps);
 
     const coins = coinCost(progress.purse, progress.coins, finding, scene.funnel);
     const patience = patienceCost(finding);
@@ -310,7 +314,10 @@ async function walk(
   const inspect = async (scene: Scene): Promise<void> => {
     await settle(200, 1500);
     applier.addLabels();
-    const results = character.checks({ pathElements: scene.path() });
+    const results = character.checks({
+      pathElements: scene.path(character.shopper),
+      seed: state.config.seed,
+    });
     const titleOf = (check: string): string =>
       results.find((result) => result.check === check)?.title ?? check;
 
@@ -381,7 +388,7 @@ async function walk(
     emit({ type: "abandon", scene, reason, coins });
     hud.say(character.onAbandon);
     hud.feed({ kind: "bad", text: `Lost the sale: ${reason}`, delta: `−${coins} coins` });
-    stage.setAnimation("squint");
+    stage.setAnimation("worry");
     stage.spillCoins(coins);
     sfx.play("abandon");
     refresh();
