@@ -33,6 +33,7 @@ export const HUD_STYLES = `
   box-shadow: 0 6px 0 #12152a, 0 12px 28px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
 }
+.panel.left { right: auto; left: 12px; }
 .who { display: flex; gap: 10px; align-items: center; }
 .portrait {
   width: 64px; height: 96px; flex: none; image-rendering: pixelated;
@@ -86,7 +87,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #ffb347; outline-offs
 .summary a { align-self: flex-start; background: #ffb347; color: #1b1f3b; border-color: #ffb347; font-size: 13px; }
 @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 @media (max-width: 720px) {
-  .panel { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 46%; }
+  .panel, .panel.left { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 46%; }
   .portrait { width: 40px; height: 60px; }
   .feed { max-height: 120px; }
 }

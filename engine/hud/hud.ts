@@ -5,6 +5,9 @@ import { HUD_TAG } from "../core/dom";
 import { Stage } from "./stage";
 import { HUD_STYLES } from "./styles";
 
+/** Width of the panel plus its margin. */
+const PANEL_SPACE = 344;
+
 export type FeedEntry = {
   kind: "pass" | "snag" | "info" | "good" | "bad";
   text: string;
@@ -55,6 +58,7 @@ export class Hud {
   private readonly summary: HTMLElement;
   private readonly controls: HTMLElement;
   private readonly lensButton: HTMLButtonElement;
+  private readonly panel: HTMLElement;
   private highlighted: Element | null = null;
   private tracking = 0;
 
@@ -74,6 +78,7 @@ export class Hud {
     this.highlightBox = el("div", "highlight");
 
     const panel = el("section", "panel");
+    this.panel = panel;
     panel.setAttribute("aria-label", "Sentinel trial");
 
     const who = el("div", "who");
@@ -197,6 +202,7 @@ export class Hud {
   /** Draws a box around an element and keeps it there as the page scrolls. */
   highlight(element: Element | null, bad = false): void {
     this.highlighted = element;
+    if (element) this.dodge(element);
     this.highlightBox.classList.toggle("on", element !== null);
     this.highlightBox.classList.toggle("bad", bad);
   }
@@ -233,9 +239,25 @@ export class Hud {
     this.highlight(null);
   }
 
-  /** Width the panel takes on the right, so the character can avoid walking under it. */
-  get reservedRight(): number {
-    return window.innerWidth > 720 ? 344 : 0;
+  /**
+   * Moves the panel to the other side of the screen when it would cover the
+   * element being looked at.
+   */
+  private dodge(element: Element): void {
+    if (window.innerWidth <= 720) return;
+    const rect = element.getBoundingClientRect();
+    const underRight = rect.right > window.innerWidth - PANEL_SPACE;
+    const underLeft = rect.left < PANEL_SPACE;
+    if (underRight && !underLeft) this.panel.classList.add("left");
+    else if (underLeft && !underRight) this.panel.classList.remove("left");
+  }
+
+  /** Space the panel takes at each side, so the character can avoid walking under it. */
+  get reserved(): { left: number; right: number } {
+    if (window.innerWidth <= 720) return { left: 0, right: 0 };
+    return this.panel.classList.contains("left")
+      ? { left: PANEL_SPACE, right: 0 }
+      : { left: 0, right: PANEL_SPACE };
   }
 
   destroy(): void {
