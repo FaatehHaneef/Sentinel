@@ -80,6 +80,7 @@ describe("scoring", () => {
         character: "iris",
         type: "snag",
         scene: "details",
+        funnel: 1.25,
         title: "Text stands out",
         line: "Too faint.",
         coins: 20,
