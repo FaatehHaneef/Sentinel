@@ -15,7 +15,11 @@ test("trying the suggested fixes lets Iris complete the purchase", async ({ page
   await page.goto(startUrl);
   await page.getByRole("link", { name: "See the full results" }).click({ timeout: 80_000 });
   await expect(page.getByText('Grandma Iris left at "Your details" without buying')).toBeVisible();
-  await expect(page.getByText("Revenue at risk (estimate)")).toBeVisible();
+  // The summary leads to the detail on separate screens.
+  await expect(page.getByText(/a month could be lost/)).toBeVisible();
+  await page.getByRole("tab", { name: "Money at risk" }).click();
+  await expect(page.getByText("Revenue at risk (estimate)").first()).toBeVisible();
+  await page.getByRole("tab", { name: "Problems and fixes" }).click();
 
   // Every snag comes with a fix, shown as code.
   const first = (await page.evaluate(
@@ -66,9 +70,11 @@ test("trying the suggested fixes lets Iris complete the purchase", async ({ page
   // The fixes really are on the page: the field has a visible label and readable placeholder.
   await page.getByRole("link", { name: "See the full results" }).click();
   await expect(page.getByText("Completed the purchase").first()).toBeVisible();
+  await page.getByRole("tab", { name: "Problems and fixes" }).click();
   await expect(page.getByText("Before and after the fixes")).toBeVisible();
-  await expect(page.getByText("Down from")).toBeVisible();
   await expect(page.getByText(/fixes were tried in this trial/)).toBeVisible();
+  await page.getByRole("tab", { name: "Money at risk" }).click();
+  await expect(page.getByText("Down from")).toBeVisible();
 });
 
 test("a fix that is not on the allow-list never reaches the page", async ({ page, request }) => {

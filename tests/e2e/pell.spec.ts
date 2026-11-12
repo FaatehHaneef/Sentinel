@@ -58,6 +58,7 @@ test("Pell leaves a page that is too heavy, then buys once the banner is fixed",
 
   // The fix switches on the store's own lighter banner for the re-run.
   await page.getByRole("link", { name: "See the full results" }).click();
+  await page.getByRole("tab", { name: "Problems and fixes" }).click();
   await expect(page.getByText("a change to the demo store's own code").first()).toBeVisible();
   await page
     .getByRole("button", { name: /Try \d+ fix(es)? and run the trial again/ })

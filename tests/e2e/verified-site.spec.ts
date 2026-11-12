@@ -100,6 +100,7 @@ test("shoppers observe an owner's own site, never act, and the results come back
   expect(page.url()).not.toContain("#record=");
   await expect(page.getByText(OWNER).first()).toBeVisible();
   await expect(page.getByText("Looked around and reported").first()).toBeVisible();
+  await page.getByRole("tab", { name: "Problems and fixes" }).click();
   await expect(page.getByText("Contrast").first()).toBeVisible();
   await expect(page.getByText("Picture with no description").first()).toBeVisible();
   // Fixes on an owner's site are code to copy, not something to try here.

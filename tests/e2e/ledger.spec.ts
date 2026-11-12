@@ -21,12 +21,17 @@ test("the ledger lists snags across trials and marks what was fixed", async ({ p
   const grid = page.getByRole("treegrid").or(page.getByRole("grid")).first();
   await expect(grid).toBeVisible();
   await expect(grid.getByText("Cog").first()).toBeVisible();
+  // Plain words by default.
+  await expect(grid.getByText("AI shoppers can't read the product details")).toBeVisible();
+  await expect(grid.getByText("Fixed", { exact: true })).toBeVisible();
+  // The technical detail is a switch away.
+  await expect(grid.getByText("The product can be read by a machine")).toHaveCount(0);
+  await page.getByRole("checkbox", { name: "Show technical detail" }).check();
   await expect(grid.getByText("The product can be read by a machine")).toBeVisible();
-  await expect(grid.getByText("Fixed in the next trial")).toBeVisible();
 
   // Searching narrows the table.
   await page.getByRole("searchbox", { name: "Search" }).fill("no-such-thing");
-  await expect(grid.getByText("Fixed in the next trial")).toHaveCount(0);
+  await expect(grid.getByText("Fixed", { exact: true })).toHaveCount(0);
 
   // The trials table opens a trial's results.
   const trials = page.getByRole("treegrid").or(page.getByRole("grid")).nth(1);
