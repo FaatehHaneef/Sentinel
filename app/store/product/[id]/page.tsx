@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/store/AddToCart";
 import { CandleArt } from "@/components/store/CandleArt";
+import { ProductData } from "@/components/store/ProductData";
 import { findProduct, formatPrice, PRODUCTS } from "@/lib/store/catalogue";
 
 export function generateStaticParams() {
@@ -34,6 +35,7 @@ export default async function ProductPage(props: PageProps<"/store/product/[id]"
           <p className="text-2xl font-bold text-wax">{formatPrice(product.priceCents)}</p>
           <p className="text-lg">{product.description}</p>
           <AddToCart productId={product.id} productName={product.name} />
+          <ProductData product={product} />
         </div>
       </div>
     </>

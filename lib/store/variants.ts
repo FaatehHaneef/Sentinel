@@ -9,7 +9,7 @@
  * the demo store: on any other site these fixes are advice to follow.
  */
 
-export const STORE_FIX_IDS = ["hero-image"] as const;
+export const STORE_FIX_IDS = ["hero-image", "product-data"] as const;
 
 export type StoreFixId = (typeof STORE_FIX_IDS)[number];
 
@@ -31,6 +31,24 @@ export const STORE_FIX_ADVICE: Record<StoreFixId, { summary: string; snippet: st
       "<!-- Export the picture at the width it is shown (1000 pixels, not 1600),\n" +
       "     compress it, and set its width and height -->\n" +
       '<img src="banner.png" width="1000" height="375" alt="…" />',
+  },
+  "product-data": {
+    summary: "Describe the product in machine-readable data, in the page's own HTML",
+    snippet:
+      '<script type="application/ld+json">\n' +
+      "{\n" +
+      '  "@context": "https://schema.org",\n' +
+      '  "@type": "Product",\n' +
+      '  "name": "Dusk Ember",\n' +
+      '  "sku": "dusk-ember",\n' +
+      '  "offers": {\n' +
+      '    "@type": "Offer",\n' +
+      '    "price": "18.00",\n' +
+      '    "priceCurrency": "USD",\n' +
+      '    "availability": "https://schema.org/InStock"\n' +
+      "  }\n" +
+      "}\n" +
+      "</script>",
   },
 };
 
