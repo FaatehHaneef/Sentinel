@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { buildHistory, buildLedger, type HistoryRow, type LedgerRow } from "@/lib/trial/ledger";
+import { PLAIN_SEVERITY } from "@/lib/trial/plain";
 import { readAllRecords } from "@/lib/trial/progress";
 import type { RunRecord, Severity } from "@/lib/trial/types";
 
@@ -54,50 +55,60 @@ export function Ledger() {
   const records = useRecords();
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [technical, setTechnical] = useState(false);
 
   const ledgerColumns = useMemo<ColDef<LedgerRow>[]>(
     () => [
       { field: "trial", headerName: "Trial", width: 150, sort: "desc" },
       { field: "shopper", headerName: "Shopper", width: 150 },
-      { field: "page", headerName: "Page", width: 140 },
+      { field: "page", headerName: "Where", width: 140 },
+      { field: "problem", headerName: "Problem", flex: 2, minWidth: 260 },
+      { field: "element", headerName: "On", flex: 1, minWidth: 180 },
       {
         field: "severity",
-        headerName: "Severity",
-        width: 120,
+        headerName: "How bad",
+        width: 200,
         comparator: (a: Severity, b: Severity) => SEVERITY_ORDER[a] - SEVERITY_ORDER[b],
-        valueFormatter: (params) =>
-          params.value ? params.value.charAt(0).toUpperCase() + params.value.slice(1) : "",
+        valueFormatter: (params) => (params.value ? PLAIN_SEVERITY[params.value as Severity] : ""),
         cellStyle: (params) => ({
           color: SEVERITY_COLOUR[params.value as Severity],
           fontWeight: 700,
         }),
       },
-      { field: "check", headerName: "Check", flex: 1, minWidth: 220 },
-      { field: "element", headerName: "Element", flex: 1, minWidth: 200 },
+      {
+        field: "status",
+        headerName: "Fixed yet?",
+        width: 170,
+        valueFormatter: (params) =>
+          params.value === "Fixed in the next trial"
+            ? "Fixed"
+            : params.value === "Still open"
+              ? "Not yet"
+              : "Not tried yet",
+        cellStyle: (params) => ({
+          color: params.value === "Fixed in the next trial" ? "#6fae75" : "#f3e9d2",
+        }),
+      },
+      // Technical detail, hidden until asked for.
+      { field: "check", headerName: "Check", flex: 1, minWidth: 220, hide: !technical },
       {
         field: "measured",
         headerName: "Measured",
         flex: 2,
         minWidth: 300,
         tooltipField: "measured",
+        hide: !technical,
       },
       {
         field: "neededToBuy",
         headerName: "Needed to buy",
         width: 140,
         valueFormatter: (params) => (params.value ? "Yes" : "No"),
+        hide: !technical,
       },
-      { field: "coins", headerName: "Coins", width: 100, type: "numericColumn" },
-      {
-        field: "status",
-        headerName: "Status",
-        width: 190,
-        cellStyle: (params) => ({
-          color: params.value === "Fixed in the next trial" ? "#6fae75" : "#f3e9d2",
-        }),
-      },
+      { field: "coins", headerName: "Coins", width: 100, type: "numericColumn", hide: !technical },
     ],
-    [],
+    [technical],
   );
 
   const historyColumns = useMemo<ColDef<HistoryRow>[]>(
@@ -146,9 +157,36 @@ export function Ledger() {
   const ledger = buildLedger(records);
   const history = buildHistory(records);
   const open = ledger.filter((row) => row.status !== "Fixed in the next trial").length;
+  const fixed = ledger.length - open;
+  const byShopper = new Map<string, number>();
+  for (const row of ledger) {
+    if (row.status !== "Fixed in the next trial") {
+      byShopper.set(row.shopper, (byShopper.get(row.shopper) ?? 0) + 1);
+    }
+  }
+  const struggled = [...byShopper.entries()].sort((a, b) => b[1] - a[1])[0];
 
   return (
     <div className="space-y-10">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="pixel-panel">
+          <p className="font-display text-sm uppercase tracking-widest text-rose">Still to fix</p>
+          <p className="mt-1 text-4xl font-bold text-parchment">{open}</p>
+        </div>
+        <div className="pixel-panel">
+          <p className="font-display text-sm uppercase tracking-widest text-moss">Fixed</p>
+          <p className="mt-1 text-4xl font-bold text-parchment">{fixed}</p>
+        </div>
+        <div className="pixel-panel">
+          <p className="font-display text-sm uppercase tracking-widest text-amber">
+            Struggled most
+          </p>
+          <p className="mt-1 text-2xl font-bold text-parchment">
+            {struggled ? `${struggled[0]}, ${struggled[1]} left` : "Nobody"}
+          </p>
+        </div>
+      </div>
+
       <section aria-labelledby="ledger-heading" className="pixel-panel">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -156,10 +194,19 @@ export function Ledger() {
               Every snag
             </h2>
             <p className="mt-1 text-mist">
-              {ledger.length} snags across {records.length} trials, {open} not yet fixed. Sort or
-              filter any column.
+              Every problem your shoppers met, across {records.length} trials. Sort or filter any
+              column.
             </p>
           </div>
+          <label className="flex items-center gap-2 text-parchment">
+            <input
+              type="checkbox"
+              className="round-check"
+              checked={technical}
+              onChange={(event) => setTechnical(event.target.checked)}
+            />
+            Show technical detail
+          </label>
           <label className="text-parchment">
             Search
             <input

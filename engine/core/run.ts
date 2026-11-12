@@ -1,5 +1,6 @@
 import { getCharacter, type CharacterId } from "@/lib/cast";
 import { writeStoreFixes } from "@/lib/store/variants";
+import { plainProblem } from "@/lib/trial/plain";
 import { levelFor, newlyEarned, readAllRecords, totalXp } from "@/lib/trial/progress";
 import { encodeRecord, RECORD_FRAGMENT } from "@/lib/trial/transfer";
 import {
@@ -307,8 +308,9 @@ async function walk(
     hud.say(line);
     hud.feed({
       kind: "snag",
-      text: finding.label,
-      detail: finding.measured,
+      // Plain words here; the measurement is on the results' Problems and fixes screen.
+      text: plainProblem(finding.check),
+      detail: finding.label,
       delta: `−${coins} coins`,
       selector: finding.selector,
     });
@@ -324,7 +326,6 @@ async function walk(
     scene: Scene,
     element: Element,
     previous: PreviousSnag,
-    title: string,
   ): Promise<void> => {
     await goTo(element);
     hud.highlight(element);
@@ -344,7 +345,7 @@ async function walk(
     hud.feed({
       kind: "good",
       text: `Fixed: ${previous.label}`,
-      detail: title,
+      detail: `No longer: ${plainProblem(previous.check).toLowerCase()}`,
       delta: `+${xp} XP`,
       selector: previous.selector,
     });
@@ -414,7 +415,7 @@ async function walk(
       // One ghost at a time, only at the place being checked now.
       stage.showGhost(ghosts.has(stop.element) ? stop.element : null);
       if (stop.kind === "snag") await reportSnag(scene, stop.located, titleOf(stop.located.check));
-      else await reportFixed(scene, stop.element, stop.previous, titleOf(stop.previous.check));
+      else await reportFixed(scene, stop.element, stop.previous);
     }
     hud.highlight(null);
     stage.showGhost(null);

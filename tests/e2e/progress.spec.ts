@@ -20,6 +20,7 @@ test("a trial earns achievements, shown on the panel, the results and the lobby"
   await expect(hud.getByText(/Store level \d+: /)).toBeVisible();
 
   await page.getByRole("link", { name: "See the full results" }).click();
+  await page.getByRole("tab", { name: "Progress" }).click();
   const progress = page.getByRole("region", { name: "Store progress" });
   await expect(progress.getByText("Store level")).toBeVisible();
   await expect(progress.getByText("First light")).toBeVisible();

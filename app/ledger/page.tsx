@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Ledger } from "@/components/sentinel/Ledger";
-import { StoreProgress } from "@/components/sentinel/StoreProgress";
 
 export const metadata: Metadata = {
   title: "The ledger | Sentinel",
@@ -33,7 +32,6 @@ export default function LedgerPage() {
         </div>
       </header>
       <div className="mt-8 space-y-10">
-        <StoreProgress />
         <Ledger />
       </div>
     </main>

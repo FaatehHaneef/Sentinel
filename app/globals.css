@@ -124,6 +124,40 @@ body {
   transform: rotate(-4deg);
 }
 
+/* Round tick boxes: navy with an amber ring, filled amber with a navy tick when chosen. */
+.round-check {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 3px solid #ffb347;
+  background: #12152a;
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+.round-check::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.35rem;
+  margin-top: -0.2rem;
+  border-left: 3px solid #12152a;
+  border-bottom: 3px solid #12152a;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 120ms ease-out;
+}
+.round-check:checked {
+  background: #ffb347;
+  box-shadow: 0 0 14px rgba(255, 179, 71, 0.75);
+}
+.round-check:checked::before {
+  transform: rotate(-45deg) scale(1);
+}
+
 /* Crisp edges for pixel art. */
 .pixelated {
   image-rendering: pixelated;

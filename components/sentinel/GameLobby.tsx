@@ -246,7 +246,7 @@ export function GameLobby({ start = "circle" }: { start?: "circle" | "line" }) {
                   <span className="mt-2 flex items-center gap-2 font-bold text-parchment">
                     <input
                       type="checkbox"
-                      className="h-6 w-6 accent-amber"
+                      className="round-check"
                       checked={chosen}
                       onChange={() => toggle(character.id)}
                       onFocus={() => setFocus(character.id)}
