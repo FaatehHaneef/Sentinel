@@ -16,30 +16,44 @@
     (document.currentScript as HTMLScriptElement | null) ??
     document.querySelector<HTMLScriptElement>("script[data-site][src*='v.js']");
   if (!script) return;
+  const base = new URL(script.src, window.location.href);
+  let loaded = false;
 
-  let active = false;
-  try {
+  /** Moves a launch token from the address bar into this tab's storage. Returns true if there was one. */
+  function takeToken(): boolean {
     const match = FRAGMENT.exec(window.location.hash);
-    if (match) {
-      window.sessionStorage.setItem(TOKEN_KEY, match[1]);
-      // Remove the token from the address bar so it is not shared or bookmarked.
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      active = true;
-    } else {
-      active = window.sessionStorage.getItem(STATE_KEY) !== null;
-    }
+    if (!match) return false;
+    window.sessionStorage.setItem(TOKEN_KEY, match[1]);
+    // Remove the token from the address bar so it is not shared or bookmarked.
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    return true;
+  }
+
+  function loadEngine(): void {
+    if (loaded) return;
+    loaded = true;
+    (window as Window & { __sentinelBoot?: unknown }).__sentinelBoot = {
+      apiBase: base.origin,
+      siteKey: script!.dataset.site ?? "",
+    };
+    const engine = document.createElement("script");
+    engine.src = new URL("sentinel-engine.js", base).toString();
+    engine.async = true;
+    document.head.append(engine);
+  }
+
+  try {
+    if (takeToken() || window.sessionStorage.getItem(STATE_KEY) !== null) loadEngine();
   } catch {
     return;
   }
-  if (!active) return;
 
-  const base = new URL(script.src, window.location.href);
-  (window as Window & { __sentinelBoot?: unknown }).__sentinelBoot = {
-    apiBase: base.origin,
-    siteKey: script.dataset.site ?? "",
-  };
-  const engine = document.createElement("script");
-  engine.src = new URL("sentinel-engine.js", base).toString();
-  engine.async = true;
-  document.head.append(engine);
+  // A trial link opened on a page that is already loaded changes only the fragment.
+  window.addEventListener("hashchange", () => {
+    try {
+      if (takeToken()) loadEngine();
+    } catch {
+      // Storage is unavailable: the trial cannot start in this tab.
+    }
+  });
 })();
