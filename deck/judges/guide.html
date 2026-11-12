@@ -3,168 +3,428 @@
   <head>
     <meta charset="utf-8" />
     <title>Sentinel: guide for judges</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       @page {
         size: A4;
-        margin: 16mm 16mm 14mm;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        font-variant-ligatures: none;
       }
       body {
-        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        font-family: "Atkinson Hyperlegible", Arial, sans-serif;
         font-size: 10.5pt;
         line-height: 1.45;
         color: #1b1f3b;
+        background: #fbf7ee;
+      }
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 12mm 13mm;
+        overflow: hidden;
+        page-break-after: always;
+        position: relative;
+      }
+      h1,
+      h2,
+      .num,
+      .kicker {
+        font-family: "Pixelify Sans", monospace;
+      }
+
+      /* Header */
+      .hero {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 3px solid #12152a;
+        box-shadow: 5px 5px 0 #12152a;
+      }
+      .hero img {
+        display: block;
+        width: 100%;
+        height: 50mm;
+        object-fit: cover;
+        object-position: center 78%;
+      }
+      .title {
+        margin: 5mm 0 1mm;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
       }
       h1 {
-        font-size: 20pt;
         margin: 0;
+        font-size: 26pt;
         color: #12152a;
       }
-      .tag {
-        margin: 2px 0 12px;
-        color: #6b5b95;
+      .kicker {
+        font-size: 11pt;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #e8743b;
+      }
+      .lead {
+        margin: 0 0 5mm;
+        font-size: 12pt;
+        color: #4b3f6e;
+      }
+
+      /* Links */
+      .links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+      }
+      .link {
+        background: #12152a;
+        color: #f3e9d2;
+        border-radius: 8px;
+        padding: 3mm 4mm;
+        border-left: 5px solid #ffb347;
+      }
+      .link b {
+        display: block;
+        font-family: "Pixelify Sans", monospace;
+        color: #ffb347;
         font-size: 11pt;
       }
+      .link span {
+        font-size: 10pt;
+        word-break: break-all;
+      }
+      .card-strip {
+        margin-top: 3mm;
+        background: #fff;
+        border: 2px dashed #6b5b95;
+        border-radius: 8px;
+        padding: 2.5mm 4mm;
+        font-size: 10.5pt;
+      }
+      .card-strip code {
+        font-family: "Atkinson Hyperlegible", sans-serif;
+        font-weight: 700;
+        font-size: 12pt;
+        letter-spacing: 0.06em;
+        color: #12152a;
+      }
+
       h2 {
-        font-size: 12.5pt;
-        margin: 14px 0 5px;
-        color: #b9552a;
-        border-bottom: 2px solid #ffb347;
-        padding-bottom: 2px;
+        font-size: 15pt;
+        margin: 5mm 0 2.5mm;
+        color: #12152a;
       }
-      ol,
-      ul {
-        margin: 4px 0;
-        padding-left: 20px;
+      h2 small {
+        font-family: "Atkinson Hyperlegible", sans-serif;
+        font-size: 10pt;
+        color: #6b5b95;
+        font-weight: 400;
+        margin-left: 6px;
       }
-      li {
-        margin: 3px 0;
+
+      /* Steps */
+      .steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5mm;
       }
-      code {
-        background: #f3e9d2;
-        padding: 0 4px;
-        border-radius: 3px;
+      .step {
+        background: #fff;
+        border-radius: 8px;
+        border: 2px solid #e6dcc6;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .step img {
+        width: 100%;
+        height: 29mm;
+        object-fit: cover;
+        object-position: center top;
+        border-bottom: 2px solid #e6dcc6;
+      }
+      .step .body {
+        padding: 2.5mm 3.5mm 3mm;
+        display: flex;
+        gap: 3mm;
+      }
+      .num {
+        flex: none;
+        width: 8mm;
+        height: 8mm;
+        border-radius: 50%;
+        background: #ffb347;
+        color: #12152a;
+        font-size: 13pt;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .step p {
+        margin: 0;
         font-size: 10pt;
       }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 4px;
+      .step b {
+        color: #12152a;
       }
-      td {
-        padding: 3px 6px;
+
+      /* Page two */
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4mm;
+      }
+      .panel {
+        background: #fff;
+        border-radius: 8px;
+        border: 2px solid #e6dcc6;
+        padding: 4mm;
+      }
+      .panel h3 {
+        margin: 0 0 1.5mm;
+        font-family: "Pixelify Sans", monospace;
+        font-size: 12pt;
+        color: #b9552a;
+      }
+      .panel p {
+        margin: 0;
+      }
+      .note {
+        display: flex;
+        gap: 4mm;
+        background: #fff4dc;
+        border-left: 6px solid #ffb347;
+        border-radius: 8px;
+        padding: 3.5mm 4mm;
+        margin-bottom: 3mm;
+      }
+      .note .icon {
+        flex: none;
+        font-size: 18pt;
+        line-height: 1;
+      }
+      .note b {
+        color: #12152a;
+      }
+      .note p {
+        margin: 1mm 0 0;
+      }
+      .safety {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .safety li {
+        padding: 2mm 0 2mm 8mm;
+        position: relative;
         border-bottom: 1px solid #e6dcc6;
-        vertical-align: top;
       }
-      td:first-child {
-        font-weight: 600;
-        width: 28%;
+      .safety li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #4d8a57;
+        font-weight: 700;
       }
-      .box {
-        background: #fff8e8;
-        border-left: 4px solid #ffb347;
-        padding: 6px 10px;
-        margin-top: 6px;
+      .shots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+        margin-top: 4mm;
+      }
+      .shots figure {
+        margin: 0;
+      }
+      .shots img {
+        width: 100%;
+        border-radius: 6px;
+        border: 2px solid #12152a;
+      }
+      .shots figcaption {
+        font-size: 9pt;
+        color: #6b5b95;
+        margin-top: 1mm;
+      }
+      .footer {
+        position: absolute;
+        bottom: 9mm;
+        left: 13mm;
+        right: 13mm;
+        font-size: 9pt;
+        color: #8a7f9e;
+        display: flex;
+        justify-content: space-between;
       }
     </style>
   </head>
   <body>
-    <h1>Sentinel: The Checkout Trials</h1>
-    <p class="tag">Gamified accessibility testing. A guide for judges.</p>
+    <!-- Page one -->
+    <section class="page">
+      <div class="hero"><img src="../export/youtube-thumbnail.png" alt="" /></div>
+      <div class="title">
+        <h1>Sentinel</h1>
+        <span class="kicker">A guide for judges</span>
+      </div>
+      <p class="lead">
+        Gamified accessibility testing. Seven pixel-art shoppers walk a real checkout and show you
+        where they give up, what it costs, and how to fix it.
+      </p>
 
-    <table>
-      <tr>
-        <td>Live app</td>
-        <td>https://sentinel-ten-ashy.vercel.app</td>
-      </tr>
-      <tr>
-        <td>Demo video</td>
-        <td>https://www.youtube.com/watch?v=aFqVHSjdlU8 (also in this zip)</td>
-      </tr>
-      <tr>
-        <td>Code (MIT)</td>
-        <td>https://github.com/FaatehHaneef/Sentinel</td>
-      </tr>
-      <tr>
-        <td>Sandbox test card</td>
-        <td><code>4111 1111 1111 1111</code>, any future expiry date, any CVV</td>
-      </tr>
-    </table>
+      <div class="links">
+        <div class="link"><b>▶ Live app</b><span>sentinel-ten-ashy.vercel.app</span></div>
+        <div class="link"><b>▶ Demo video</b><span>youtube.com/watch?v=aFqVHSjdlU8</span></div>
+        <div class="link"><b>▶ Slides</b><span>sentinel-deck-six.vercel.app</span></div>
+        <div class="link"><b>▶ Code (MIT)</b><span>github.com/FaatehHaneef/Sentinel</span></div>
+      </div>
+      <div class="card-strip">
+        💳 To pay by hand in the store, use the sandbox test card
+        <code>4111 1111 1111 1111</code> with any future expiry date and any CVV.
+      </div>
 
-    <h2>Try it in five minutes</h2>
-    <ol>
-      <li>Open the live app and press <b>Start your trial</b>. The shoppers walk into a line.</li>
-      <li>
-        Grandma Iris is ticked. Tick <b>Tobin</b> too, and press <b>Start the trial</b>. Watch them
-        walk the demo store. Each problem they meet is outlined on the page, and costs them coins
-        and patience.
-      </li>
-      <li>
-        When they finish, press <b>See the full results</b>. You'll see who bought, the worst
-        problems in plain words, and the money at risk each month.
-      </li>
-      <li>
-        Press <b>Try … fixes and run the trial again</b>. The suggested fixes are applied in your
-        browser only, and the same shoppers walk again. Iris now gets through and pays in the
-        Braintree sandbox.
-      </li>
-      <li>
-        Go back to the lobby and send <b>Cog</b> alone. Cog is an AI shopping agent: it can't buy
-        until the store publishes machine-readable product data. Try its one fix, and Cog's agent
-        decides to buy and places a sandbox order itself.
-      </li>
-      <li>Open <b>The ledger</b> to see every problem across trials in an AG Grid table.</li>
-    </ol>
-    <div class="box">
-      Use <b>Pause</b> or <b>See as Iris</b> during a trial to stop or to see the page the way that
-      shopper does. All seven shoppers can go at once with <b>Send everyone</b>, but that takes a
-      few minutes.
-    </div>
+      <h2>Try it in five minutes <small>start at the live app</small></h2>
+      <div class="steps">
+        <div class="step">
+          <img src="../../public/showcase/lobby-line.png" alt="" />
+          <div class="body">
+            <div class="num">1</div>
+            <p>
+              Press <b>Start your trial</b>. Grandma Iris is already ticked; tick <b>Tobin</b> too,
+              then press <b>Start the trial</b>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <img src="../../public/showcase/trial.png" alt="" />
+          <div class="body">
+            <div class="num">2</div>
+            <p>
+              Watch them walk the store. Each problem is <b>outlined on the page</b> and costs them
+              coins and patience.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <img src="../../public/showcase/results.png" alt="" />
+          <div class="body">
+            <div class="num">3</div>
+            <p>
+              Press <b>See the full results</b>: who bought, the worst problems in plain words, and
+              the money at risk.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <img src="../../public/showcase/rerun.png" alt="" />
+          <div class="body">
+            <div class="num">4</div>
+            <p>
+              Press <b>Try … fixes and run the trial again</b>. Iris walks again, gets through, and
+              pays in the Braintree sandbox.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Sentinel: The Checkout Trials · PayPal AI Hackathon</span><span>1 / 2</span>
+      </div>
+    </section>
 
-    <h2>Where PayPal and AI are used</h2>
-    <ul>
-      <li>
-        <b>Braintree sandbox (a PayPal service):</b> the demo store's real checkout. Line items with
-        prices set on the server, protection against double payment, handled declines, and webhooks
-        that are signature-checked.
-      </li>
-      <li>
-        <b>Gemini:</b> writes each shopper's verdict from the measurements, suggests colours (used
-        only if they pass the contrast maths), and runs Cog's buying agent.
-      </li>
-      <li>
-        <b>Every number is measured by the browser</b> on the live page. The AI explains; it never
-        makes up a measurement.
-      </li>
-    </ul>
+    <!-- Page two -->
+    <section class="page">
+      <div class="steps">
+        <div class="step">
+          <img src="cog-order.png" alt="" style="object-position: center 30%" />
+          <div class="body">
+            <div class="num">5</div>
+            <p>
+              Back in the lobby, send <b>Cog</b> alone. The AI agent can't buy until the store
+              publishes product data. Try its one fix, and <b>its agent places a sandbox order</b>
+              itself.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <img src="../../public/showcase/ledger.png" alt="" />
+          <div class="body">
+            <div class="num">6</div>
+            <p>
+              Open <b>The ledger</b>: every problem from every trial in an AG Grid table. Sort it,
+              filter it, see what's fixed.
+            </p>
+          </div>
+        </div>
+      </div>
 
-    <h2>Things you might notice</h2>
-    <ul>
-      <li>
-        <b>"Wick's standard notes, written without AI."</b> Gemini runs on its free tier, which has
-        a daily limit. When it's used up or Google is busy, Sentinel uses its own built-in notes and
-        says so on screen, and Cog uses the ordinary checkout instead of its agent. Everything else
-        works the same.
-      </li>
-      <li>
-        <b>No PayPal button in the payment form.</b> PayPal accounts, including developer sandbox
-        accounts, aren't available to developers in Pakistan, where Sentinel was built, so no
-        PayPal account could be linked to the Braintree sandbox. Cards work. The PayPal button is
-        wired in and turns on with one setting once an account is linked.
-      </li>
-      <li>
-        <b>Records stay in your browser.</b> There are no accounts, so the ledger shows the trials
-        run in your own browser.
-      </li>
-    </ul>
+      <h2>Where PayPal and AI do the work</h2>
+      <div class="two">
+        <div class="panel">
+          <h3>Braintree sandbox (PayPal)</h3>
+          <p>
+            The demo store's real checkout: line items with prices set on the server, protection
+            against double payment, handled declines, and signature-checked webhooks.
+          </p>
+        </div>
+        <div class="panel">
+          <h3>Gemini</h3>
+          <p>
+            Writes each shopper's verdict from the measurements, suggests colours that must pass the
+            contrast maths, and runs Cog's buying agent. Every number is the browser's, never the
+            AI's.
+          </p>
+        </div>
+      </div>
 
-    <h2>Safety, enforced in code</h2>
-    <ul>
-      <li>
-        Trials run only on our demo store, or on sites whose owner added Sentinel's line of code
-        with a signed key. On owners' sites the shoppers only look: they never type, pay or buy.
-      </li>
-      <li>Sandbox only: a live payments setting makes the app refuse to start.</li>
-      <li>Only fixes from a fixed allow-list can ever be applied to a page.</li>
-    </ul>
+      <h2>Things you might notice</h2>
+      <div class="note">
+        <div class="icon">🤖</div>
+        <div>
+          <b>"Wick's standard notes, written without AI."</b>
+          <p>
+            Gemini runs on its free tier, which has a daily limit. When it's used up or Google is
+            busy, Sentinel uses its own notes and says so, and Cog uses the ordinary checkout. Try
+            again later for Gemini's version.
+          </p>
+        </div>
+      </div>
+      <div class="note">
+        <div class="icon">💳</div>
+        <div>
+          <b>No PayPal button in the payment form.</b>
+          <p>
+            PayPal accounts, including developer sandbox ones, aren't available to developers in
+            Pakistan, where Sentinel was built. So payments use Braintree's sandbox with cards. The
+            PayPal button is wired in and turns on with one setting once an account is linked.
+          </p>
+        </div>
+      </div>
+      <div class="note">
+        <div class="icon">📒</div>
+        <div>
+          <b>The ledger only shows your trials.</b>
+          <p>There are no accounts yet, so records stay in your own browser.</p>
+        </div>
+      </div>
+
+      <h2>Safe by design</h2>
+      <ul class="safety">
+        <li>
+          Runs only on our demo store, or on sites whose owner added Sentinel's line of code. There,
+          the shoppers only look: they never type, pay or buy.
+        </li>
+        <li>Sandbox only: a live payments setting makes the app refuse to start.</li>
+        <li>Only fixes from a fixed allow-list can ever be applied to a page.</li>
+      </ul>
+      <div class="footer">
+        <span>Sentinel: The Checkout Trials · PayPal AI Hackathon</span><span>2 / 2</span>
+      </div>
+    </section>
   </body>
 </html>
