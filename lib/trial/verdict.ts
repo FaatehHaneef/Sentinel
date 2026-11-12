@@ -127,6 +127,14 @@ const WHY: Record<string, string> = {
     "Without a marked main area, a screen reader user has to listen through everything to find the content.",
   "echo.page-basics":
     "The page does not say what language it is in or what it is called, so it may be read in the wrong voice or announced as nothing.",
+  "pell.wait":
+    "On a weak connection every kilobyte costs time, and most of this page's weight is one picture. Make it smaller and the page arrives in seconds rather than a quarter of a minute.",
+  "pell.heavy-images":
+    "This picture is far bigger than it needs to be for the space it fills. Export it at the size it is shown and compress it.",
+  "pell.layout-shift":
+    "Things move while the page loads, so a shopper who is reading or tapping finds the page has moved under them. Reserve space for what loads late.",
+  "pell.lazy-images":
+    "This picture loads before the shopper can see it, slowing down everything above it. Let it load when it is about to be seen.",
   "iris.button":
     "A button that barely differs from the page is easy to miss altogether. Give it a visible edge or a stronger colour.",
 };
