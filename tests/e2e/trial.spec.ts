@@ -12,7 +12,8 @@ test("Iris finds the planted snags in the details form and leaves", async ({ pag
   const { runId, startUrl } = (await created.json()) as { runId: string; startUrl: string };
 
   await page.goto(startUrl);
-  // The launch token is removed from the address bar as soon as it is read.
+  // Once the trial has started, the launch token is gone from the address bar.
+  await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await expect(page).not.toHaveURL(/sentinel=/);
 
   const resultsLink = page.getByRole("link", { name: "See the full results" });
@@ -83,7 +84,9 @@ test("a trial cannot start without a launch token from the server", async ({ pag
   await page.waitForTimeout(1500);
   expect(await page.locator("sentinel-hud").count()).toBe(0);
 
-  // Characters that are not built yet cannot be sent.
-  const notReady = await request.post("/api/runs", { data: { party: ["dash"] } });
-  expect(notReady.status()).toBe(400);
+  // Nobody joins twice, and only the seven characters exist.
+  const twice = await request.post("/api/runs", { data: { party: ["dash", "dash"] } });
+  expect(twice.status()).toBe(400);
+  const stranger = await request.post("/api/runs", { data: { party: ["mallory"] } });
+  expect(stranger.status()).toBe(400);
 });

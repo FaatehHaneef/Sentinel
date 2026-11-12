@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COG_FRAMES, COG_PALETTE } from "@/engine/art/cog";
+import { DASH_FRAMES, DASH_PALETTE } from "@/engine/art/dash";
 import { ECHO_FRAMES, ECHO_PALETTE } from "@/engine/art/echo";
 import { IRIS_FRAMES, IRIS_PALETTE } from "@/engine/art/iris";
 import { KNOCK_FRAMES, KNOCK_PALETTE } from "@/engine/art/knock";
@@ -13,6 +14,7 @@ const SHEETS = {
   echo: { frames: ECHO_FRAMES, palette: ECHO_PALETTE },
   pell: { frames: PELL_FRAMES, palette: PELL_PALETTE },
   cog: { frames: COG_FRAMES, palette: COG_PALETTE },
+  dash: { frames: DASH_FRAMES, palette: DASH_PALETTE },
 };
 
 /** Every character must supply these, because the stage animates them by name. */
