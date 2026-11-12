@@ -46,4 +46,6 @@ export type Journey = {
   startPath: string;
   /** Reads the order id once the purchase is complete. */
   orderId(): string;
+  /** True on sites other than the demo store: shoppers look and report, and never act. */
+  observeOnly?: boolean;
 };

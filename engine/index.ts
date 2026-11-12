@@ -1,6 +1,7 @@
 import type { RunConfig } from "@/lib/trial/types";
 import { runTrial } from "./core/run";
 import { loadState, newState, saveState, TOKEN_KEY, type EngineState } from "./core/state";
+import { observeJourney } from "./journeys/observe";
 import { tallowmere } from "./journeys/tallowmere";
 
 /**
@@ -64,7 +65,9 @@ async function start(boot: Boot): Promise<void> {
   }
 
   try {
-    await runTrial(state, tallowmere, boot.apiBase);
+    // Only Sentinel's own demo store is walked and bought from. Anywhere else, shoppers only observe.
+    const journey = state.config.kind === "own" ? tallowmere : observeJourney();
+    await runTrial(state, journey, boot.apiBase);
   } finally {
     window.__sentinelRunning = false;
   }
