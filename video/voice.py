@@ -54,7 +54,7 @@ def pieces(text):
         elif part == "/":
             steps.append(("pause", SHORT_PAUSE))
         else:
-            for i, chunk in enumerate(re.split(r"\*", part)):
+            for i, chunk in enumerate(re.split(r"[*_]", part)):  # *stress* or _stress_
                 if chunk.strip():
                     steps.append(("say", chunk.strip(), i % 2 == 1))
     return steps
