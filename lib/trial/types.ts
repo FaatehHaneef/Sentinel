@@ -8,6 +8,37 @@ import type { CharacterId } from "@/lib/cast";
 
 export type Severity = "minor" | "major" | "blocker";
 
+/** The numbers behind a measurement, kept so a fix can be checked against them. */
+export type Evidence = {
+  /** Colours as #rrggbb, after blending any transparency. */
+  foreground?: string;
+  background?: string;
+  /** The contrast ratio measured, and the ratio required. */
+  ratio?: number;
+  required?: number;
+  fontSizePx?: number;
+};
+
+/** One style change: which part of the element, and the declarations to set. */
+export type CssChange = {
+  target: "element" | "placeholder";
+  declarations: Record<string, string>;
+};
+
+/**
+ * A suggested repair for one finding. It can only restyle the element or add
+ * a visible label above a field: nothing else is expressible.
+ */
+export type Fix = {
+  /** What the fix does, in plain words. */
+  summary: string;
+  css?: CssChange[];
+  /** Text of a visible label to add above a field. */
+  label?: string;
+  /** rule: computed from the measurement. ai: a colour suggested by AI and checked by the same maths. */
+  source: "rule" | "ai";
+};
+
 /** One measured problem on one element. */
 export type Finding = {
   /** Check id, for example "iris.contrast". */
@@ -21,6 +52,17 @@ export type Finding = {
   measured: string;
   /** True when the shopper has to use this element to complete the purchase. */
   onPath: boolean;
+  evidence?: Evidence;
+  fix?: Fix;
+};
+
+/** A fix chosen to be tried on the page during a re-run. */
+export type AppliedFix = {
+  check: string;
+  selector: string;
+  /** The element's description, for the feed and the results. */
+  label: string;
+  fix: Fix;
 };
 
 export type Outcome = "purchased" | "abandoned" | "stopped";
@@ -31,12 +73,25 @@ type EventBody =
   | {
       type: "snag";
       scene: string;
+      /** How close to payment the scene is: 0.5 at the shop front, 1.5 at the pay step. */
+      funnel: number;
       finding: Finding;
       title: string;
       /** What the character says about it. */
       line: string;
       coins: number;
       patience: number;
+    }
+  | {
+      /** A snag from the previous trial that is gone in this one. */
+      type: "fixed";
+      scene: string;
+      check: string;
+      selector: string;
+      label: string;
+      /** Coins the snag cost last time, now kept. */
+      coinsSaved: number;
+      xp: number;
     }
   | { type: "action"; scene: string; text: string }
   | { type: "purchase"; orderId: string; xp: number }
@@ -61,6 +116,8 @@ export type RunConfig = {
   origin: string;
   /** own: Sentinel's demo store. verified: a site whose owner installed the script. */
   kind: "own" | "verified";
+  /** Set on a re-run: the trial whose chosen fixes are being tried. */
+  previousRunId?: string;
 };
 
 /** A finished or in-progress run, as saved for the results page. */
@@ -69,6 +126,13 @@ export type RunRecord = {
   startedAt: string;
   finishedAt?: string;
   events: TrialEvent[];
+  /** Fixes that were applied to the page during this run. */
+  fixes?: AppliedFix[];
 };
 
 export const RUN_STORAGE_PREFIX = "sentinel:run:";
+
+/** Where the fixes chosen on the results page wait for the re-run to pick them up. */
+export const FIXES_STORAGE_KEY = "sentinel:fixes";
+
+export type PendingFixes = { fromRun: string; fixes: AppliedFix[] };
