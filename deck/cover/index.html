@@ -111,7 +111,7 @@
 
       .title {
         position: absolute;
-        top: 92px;
+        top: 52px;
         width: 100%;
         text-align: center;
       }
@@ -135,24 +135,27 @@
       }
 
       /* The shoppers, crowded in, two rows, leaning towards the camera. */
-      .crowd canvas {
+      #crowd {
         position: absolute;
+        inset: 0;
+        width: 1500px;
+        height: 1000px;
         image-rendering: pixelated;
-        filter: drop-shadow(6px 6px 0 rgba(9, 10, 21, 0.55));
       }
 
       .note {
         position: absolute;
-        left: 92px;
-        bottom: 96px;
-        width: 300px;
+        left: 70px;
+        top: 150px;
+        width: 290px;
         padding: 26px 24px 22px;
         background: #ffe9a8;
         color: #3a2a20;
         transform: rotate(-6deg);
         box-shadow: 8px 8px 0 rgba(9, 10, 21, 0.6);
-        font-size: 40px;
-        line-height: 1.05;
+        font-family: "Atkinson Hyperlegible", sans-serif;
+        font-size: 44px;
+        line-height: 1.1;
         font-weight: 700;
       }
       .note::before {
@@ -180,32 +183,7 @@
       <img class="backdrop" src="../assets/banner.png" alt="" />
       <div class="glow"></div>
 
-      <div class="crowd">
-        <!-- Back row, a little further from the camera. -->
-        <canvas data-who="tobin" data-scale="11" style="left: 352px; top: 404px"></canvas>
-        <canvas
-          data-who="pell"
-          data-scale="11"
-          data-flip="1"
-          style="left: 548px; top: 396px"
-        ></canvas>
-        <canvas data-who="knock" data-scale="11" style="left: 760px; top: 400px"></canvas>
-        <canvas
-          data-who="echo"
-          data-scale="11"
-          data-flip="1"
-          style="left: 960px; top: 408px"
-        ></canvas>
-        <!-- Front row, close to the camera. -->
-        <canvas data-who="cog" data-scale="14" style="left: 418px; top: 560px"></canvas>
-        <canvas data-who="iris" data-scale="15" style="left: 630px; top: 546px"></canvas>
-        <canvas
-          data-who="dash"
-          data-scale="14"
-          data-flip="1"
-          style="left: 862px; top: 560px"
-        ></canvas>
-      </div>
+      <canvas id="crowd"></canvas>
 
       <div class="title">
         <h1>SENTINEL</h1>
@@ -215,11 +193,7 @@
       <div class="phone"></div>
       <div class="status">
         <span>9:41</span>
-        <span>REC ●<span class="battery"></span></span>
       </div>
-      <div class="bracket tl"></div>
-      <div class="bracket tr"></div>
-      <div class="shutter"></div>
 
       <div class="note">
         make it accessible!
