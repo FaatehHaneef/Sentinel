@@ -34,6 +34,14 @@ export default async function ProductPage(props: PageProps<"/store/product/[id]"
           <h1 className="font-display text-4xl font-bold">{product.name}</h1>
           <p className="text-2xl font-bold text-wax">{formatPrice(product.priceCents)}</p>
           <p className="text-lg">{product.description}</p>
+          {/*
+            Deliberate snag for the trials: on phone-sized screens this line
+            refuses to wrap and is wider than the screen, so the whole page
+            scrolls sideways. From 640 pixels up it wraps normally.
+          */}
+          <p className="min-w-[34rem] whitespace-nowrap rounded border border-line bg-card px-3 py-2 text-sm sm:min-w-0 sm:whitespace-normal">
+            Free delivery on orders over $40 · Order by 3pm for same-day dispatch
+          </p>
           <AddToCart productId={product.id} productName={product.name} />
           <ProductData product={product} />
         </div>

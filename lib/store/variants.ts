@@ -9,7 +9,7 @@
  * the demo store: on any other site these fixes are advice to follow.
  */
 
-export const STORE_FIX_IDS = ["hero-image", "product-data"] as const;
+export const STORE_FIX_IDS = ["hero-image", "product-data", "phone-popup"] as const;
 
 export type StoreFixId = (typeof STORE_FIX_IDS)[number];
 
@@ -31,6 +31,13 @@ export const STORE_FIX_ADVICE: Record<StoreFixId, { summary: string; snippet: st
       "<!-- Export the picture at the width it is shown (1000 pixels, not 1600),\n" +
       "     compress it, and set its width and height -->\n" +
       '<img src="banner.png" width="1000" height="375" alt="…" />',
+  },
+  "phone-popup": {
+    summary: "Do not open a popup over the page on arrival on small screens",
+    snippet:
+      "<!-- On phones, show the offer inside the page instead of over it,\n" +
+      "     and never before the shopper has had a chance to look around -->\n" +
+      '<section class="club-offer">…</section>',
   },
   "product-data": {
     summary: "Describe the product in machine-readable data, in the page's own HTML",

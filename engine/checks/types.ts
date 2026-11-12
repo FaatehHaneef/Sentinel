@@ -28,6 +28,8 @@ export type CheckContext = {
   pathElements: Element[];
   /** The seed of the run, so anything simulated is repeatable. */
   seed: number;
+  /** Applies this trial's fixes to another document of the same site, such as a phone-sized view of the page. */
+  prepare?(doc: Document): void;
 };
 
 export function isOnPath(element: Element, context: CheckContext): boolean {

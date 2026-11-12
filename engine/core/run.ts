@@ -12,6 +12,7 @@ import type { Finding, Outcome, TrialEvent } from "@/lib/trial/types";
 import { buildSprite } from "../art/sprite";
 import { Sfx } from "../audio/sfx";
 import { cog } from "../cast/cog";
+import { dash } from "../cast/dash";
 import { iris } from "../cast/iris";
 import { knock } from "../cast/knock";
 import { pell } from "../cast/pell";
@@ -23,7 +24,7 @@ import { Hud } from "../hud/hud";
 import { SPRITE_SCALE } from "../hud/stage";
 import type { Actor, Journey, Scene } from "../journeys/types";
 import { Clock, StopSignal } from "./clock";
-import { documentTop, setInputValue, settle } from "./dom";
+import { documentTop, isVisible, setInputValue, settle } from "./dom";
 import { FixApplier } from "./fixes";
 import {
   clearState,
@@ -40,6 +41,7 @@ const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = {
   pell,
   knock,
   echo,
+  dash,
   cog,
 };
 
@@ -343,6 +345,7 @@ async function walk(
     const results = await character.checks({
       pathElements: scene.path(character.shopper),
       seed: state.config.seed,
+      prepare: (doc) => applier.apply(doc),
     });
     const titleOf = (check: string): string =>
       results.find((result) => result.check === check)?.title ?? check;
@@ -373,10 +376,15 @@ async function walk(
     const ghosts = new Set<Element>();
     for (const previous of before) {
       const element = find(previous.selector);
-      if (!element) continue;
-      ghosts.add(element);
+      const shown = element && isVisible(element) ? element : null;
+      if (shown) ghosts.add(shown);
+      // A snag whose element is gone altogether (a popup that no longer appears) is fixed too.
       if (!failing.has(`${previous.check}|${previous.selector}`)) {
-        stops.push({ kind: "fixed", element, previous });
+        stops.push({
+          kind: "fixed",
+          element: shown ?? document.querySelector("main") ?? document.body,
+          previous,
+        });
       }
     }
     stage.setGhosts([...ghosts]);

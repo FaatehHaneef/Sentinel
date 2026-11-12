@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Banner } from "@/components/store/Banner";
 import { CandleArt } from "@/components/store/CandleArt";
+import { ClubPopup } from "@/components/store/ClubPopup";
 import { formatPrice, PRODUCTS } from "@/lib/store/catalogue";
 
 export default function StorePage() {
@@ -9,6 +10,7 @@ export default function StorePage() {
       <div className="mb-8 aspect-[8/3] w-full overflow-hidden rounded-lg bg-indigo">
         <Banner />
       </div>
+      <ClubPopup />
       <h1 className="font-display text-4xl font-bold">Candles for the road home</h1>
       <p className="mt-3 max-w-2xl text-lg text-ink-soft">
         Hand-poured in small batches at the stall where the road ends.

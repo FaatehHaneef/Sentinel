@@ -366,11 +366,20 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
     setStarting(true);
     setError("");
     try {
-      const pending: PendingFixes = { fromRun: record.config.runId, fixes: chosen };
+      // Fixes build up from trial to trial: the ones already tried stay, and the new ones join them.
+      const fixes = [...(record.fixes ?? [])];
+      for (const fix of chosen) {
+        const same = fixes.findIndex(
+          (entry) => entry.check === fix.check && entry.selector === fix.selector,
+        );
+        if (same >= 0) fixes[same] = fix;
+        else fixes.push(fix);
+      }
+      const pending: PendingFixes = { fromRun: record.config.runId, fixes };
       window.localStorage.setItem(FIXES_STORAGE_KEY, JSON.stringify(pending));
       writeStoreFixes(
         window.localStorage,
-        chosen.flatMap(({ fix }) => (fix.storeFix ? [fix.storeFix] : [])),
+        fixes.flatMap(({ fix }) => (fix.storeFix ? [fix.storeFix] : [])),
       );
       const response = await fetch("/api/runs", {
         method: "POST",
