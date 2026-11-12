@@ -2,8 +2,8 @@
 
     python video/music.py      # writes video/build/music.wav, as long as the voice-over
 
-Synthesised from scratch (triangle and soft square waves), so it's ours to use.
-A gentle arpeggio over a warm bass, in C major at 92 beats a minute, with a
+Synthesised from scratch (triangle waves), so it's ours to use.
+A gentle arpeggio with a light melody, in C major at 92 beats a minute, with a
 slow fade in and out. compose.py mixes it quietly under the voice.
 """
 
@@ -59,9 +59,6 @@ def loop():
 
     for i, chord in enumerate(PROGRESSION):
         start = i * 2 * bar
-        # Bass: the root, on beats one and three.
-        for b in range(0, 8, 2):
-            add(tone(chord[0] - 24, BEAT * 1.6, "square", decay=2.5), start + b * BEAT, 0.16)
         # Arpeggio: up and down the chord in eighth notes.
         pattern = [0, 1, 2, 1, 0, 1, 2, 1] * 2
         for j, k in enumerate(pattern):
