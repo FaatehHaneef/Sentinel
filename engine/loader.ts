@@ -15,7 +15,8 @@
   const script =
     (document.currentScript as HTMLScriptElement | null) ??
     document.querySelector<HTMLScriptElement>("script[data-site][src*='v.js']");
-  if (!script) return;
+  // Never inside a frame: Sentinel's own phone-sized view loads the page in one.
+  if (!script || window.top !== window.self) return;
   const base = new URL(script.src, window.location.href);
   let loaded = false;
 

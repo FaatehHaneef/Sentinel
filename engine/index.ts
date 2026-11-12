@@ -44,7 +44,7 @@ function takeToken(): string | null {
 }
 
 async function start(boot: Boot): Promise<void> {
-  if (window.__sentinelRunning) return;
+  if (window.__sentinelRunning || window.top !== window.self) return;
   window.__sentinelRunning = true;
 
   let state: EngineState | null = null;

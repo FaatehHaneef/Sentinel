@@ -17,6 +17,7 @@ const KEYS_ATTRIBUTE = "data-sentinel-keys";
 
 export class FixApplier {
   private readonly fixes: AppliedFix[];
+  private readonly css: string;
   private observer: MutationObserver | null = null;
   private pending = 0;
   private counter = 0;
@@ -25,6 +26,10 @@ export class FixApplier {
     this.fixes = fixes
       .map((fix) => sanitizeAppliedFix(fix))
       .filter((fix): fix is AppliedFix => fix !== null);
+    this.css = this.fixes
+      .map(({ selector, fix }) => fixToCss(selector, fix, true))
+      .filter(Boolean)
+      .join("\n");
   }
 
   get count(): number {
@@ -37,18 +42,6 @@ export class FixApplier {
 
   start(): void {
     if (this.fixes.length === 0) return;
-    const css = this.fixes
-      .map(({ selector, fix }) => fixToCss(selector, fix, true))
-      .filter(Boolean)
-      .join("\n");
-    if (css) {
-      document.querySelector(`style[${STYLE_ATTRIBUTE}]`)?.remove();
-      const style = document.createElement("style");
-      style.setAttribute(STYLE_ATTRIBUTE, "");
-      style.textContent = css;
-      document.head.append(style);
-    }
-
     this.apply();
     // Pages change as the shopper moves through them, so labels are added again when fields appear.
     this.observer = new MutationObserver((mutations) => {
@@ -59,12 +52,21 @@ export class FixApplier {
     this.observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  /** Applies everything that is not a style rule now, without waiting for the observer. */
-  apply(): void {
+  /** Applies the fixes now, to this page or to another document of the same site (a phone-sized view of it). */
+  apply(doc: Document = document): void {
+    if (this.fixes.length === 0) return;
+
+    if (this.css && !doc.querySelector(`style[${STYLE_ATTRIBUTE}]`)) {
+      const style = doc.createElement("style");
+      style.setAttribute(STYLE_ATTRIBUTE, "");
+      style.textContent = this.css;
+      doc.head.append(style);
+    }
+
     for (const { selector, fix } of this.fixes) {
       let field: Element | null = null;
       try {
-        field = document.querySelector(selector);
+        field = doc.querySelector(selector);
       } catch {
         continue;
       }
@@ -87,7 +89,7 @@ export class FixApplier {
 
       if (!fix.label || field.previousElementSibling?.hasAttribute(LABEL_ATTRIBUTE)) continue;
 
-      const label = document.createElement("label");
+      const label = doc.createElement("label");
       label.setAttribute(LABEL_ATTRIBUTE, "");
       label.id = `sentinel-label-${++this.counter}`;
       label.textContent = fix.label;

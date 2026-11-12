@@ -16,6 +16,9 @@ export const ALLOWED_PROPERTIES = [
   "border-style",
   "outline",
   "outline-offset",
+  "white-space",
+  "max-width",
+  "overflow-wrap",
   "font-size",
   "font-weight",
   "text-decoration",
@@ -43,6 +46,22 @@ const ATTRIBUTE_RULES: Record<string, (value: string) => boolean> = {
   "aria-label": (value) => value.length > 0 && value.length <= 120,
   alt: (value) => value.length <= 160,
   loading: (value) => value === "lazy",
+  type: (value) => ["email", "tel"].includes(value),
+  inputmode: (value) => ["email", "tel", "numeric", "decimal", "text"].includes(value),
+  autocomplete: (value) =>
+    [
+      "name",
+      "given-name",
+      "family-name",
+      "email",
+      "tel",
+      "street-address",
+      "address-line1",
+      "address-line2",
+      "postal-code",
+      "country",
+      "off",
+    ].includes(value),
   lang: (value) => /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(value),
 };
 
