@@ -153,6 +153,26 @@ figcaption {
   color: var(--amber);
 }
 
+.six {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.six .card {
+  padding: 16px 18px;
+  gap: 6px;
+}
+
+.six h3 {
+  font-size: 22px;
+}
+
+.six p {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
 .split {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
