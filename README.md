@@ -7,7 +7,7 @@ each standing for a real kind of customer, walk through a store's actual pages a
 something. You watch where
 each one struggles, see what it could cost you, try the fix in one click, and send them again.
 
-**[Try it live](https://sentinel-ten-ashy.vercel.app)** · **Demo video** (link coming) ·
+**[Try it live](https://sentinel-ten-ashy.vercel.app)** · **[Demo video](https://www.youtube.com/watch?v=aFqVHSjdlU8)** ·
 **[Slides](deck/)** · Built for the PayPal AI Hackathon · MIT licence
 
 ![The Sentinel lobby: seven pixel shoppers standing in a circle at dusk](public/showcase/lobby-circle.png)
