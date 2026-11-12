@@ -18,6 +18,8 @@
     "check": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
+    "ag-grid-community": "^36.3.0",
+    "ag-grid-react": "^36.3.0",
     "braintree": "^3.41.0",
     "braintree-web-drop-in": "^1.48.0",
     "jose": "^6.2.17",
