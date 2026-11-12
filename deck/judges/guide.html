@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sentinel: guide for judges</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 16mm 16mm 14mm;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.45;
+        color: #1b1f3b;
+      }
+      h1 {
+        font-size: 20pt;
+        margin: 0;
+        color: #12152a;
+      }
+      .tag {
+        margin: 2px 0 12px;
+        color: #6b5b95;
+        font-size: 11pt;
+      }
+      h2 {
+        font-size: 12.5pt;
+        margin: 14px 0 5px;
+        color: #b9552a;
+        border-bottom: 2px solid #ffb347;
+        padding-bottom: 2px;
+      }
+      ol,
+      ul {
+        margin: 4px 0;
+        padding-left: 20px;
+      }
+      li {
+        margin: 3px 0;
+      }
+      code {
+        background: #f3e9d2;
+        padding: 0 4px;
+        border-radius: 3px;
+        font-size: 10pt;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 4px;
+      }
+      td {
+        padding: 3px 6px;
+        border-bottom: 1px solid #e6dcc6;
+        vertical-align: top;
+      }
+      td:first-child {
+        font-weight: 600;
+        width: 28%;
+      }
+      .box {
+        background: #fff8e8;
+        border-left: 4px solid #ffb347;
+        padding: 6px 10px;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sentinel: The Checkout Trials</h1>
+    <p class="tag">Gamified accessibility testing. A guide for judges.</p>
+
+    <table>
+      <tr>
+        <td>Live app</td>
+        <td>https://sentinel-ten-ashy.vercel.app</td>
+      </tr>
+      <tr>
+        <td>Demo video</td>
+        <td>https://www.youtube.com/watch?v=aFqVHSjdlU8 (also in this zip)</td>
+      </tr>
+      <tr>
+        <td>Code (MIT)</td>
+        <td>https://github.com/FaatehHaneef/Sentinel</td>
+      </tr>
+      <tr>
+        <td>Sandbox test card</td>
+        <td><code>4111 1111 1111 1111</code>, any future expiry date, any CVV</td>
+      </tr>
+    </table>
+
+    <h2>Try it in five minutes</h2>
+    <ol>
+      <li>Open the live app and press <b>Start your trial</b>. The shoppers walk into a line.</li>
+      <li>
+        Grandma Iris is ticked. Tick <b>Tobin</b> too, and press <b>Start the trial</b>. Watch them
+        walk the demo store. Each problem they meet is outlined on the page, and costs them coins
+        and patience.
+      </li>
+      <li>
+        When they finish, press <b>See the full results</b>. You'll see who bought, the worst
+        problems in plain words, and the money at risk each month.
+      </li>
+      <li>
+        Press <b>Try … fixes and run the trial again</b>. The suggested fixes are applied in your
+        browser only, and the same shoppers walk again. Iris now gets through and pays in the
+        Braintree sandbox.
+      </li>
+      <li>
+        Go back to the lobby and send <b>Cog</b> alone. Cog is an AI shopping agent: it can't buy
+        until the store publishes machine-readable product data. Try its one fix, and Cog's agent
+        decides to buy and places a sandbox order itself.
+      </li>
+      <li>Open <b>The ledger</b> to see every problem across trials in an AG Grid table.</li>
+    </ol>
+    <div class="box">
+      Use <b>Pause</b> or <b>See as Iris</b> during a trial to stop or to see the page the way that
+      shopper does. All seven shoppers can go at once with <b>Send everyone</b>, but that takes a
+      few minutes.
+    </div>
+
+    <h2>Where PayPal and AI are used</h2>
+    <ul>
+      <li>
+        <b>Braintree sandbox (a PayPal service):</b> the demo store's real checkout. Line items with
+        prices set on the server, protection against double payment, handled declines, and webhooks
+        that are signature-checked.
+      </li>
+      <li>
+        <b>Gemini:</b> writes each shopper's verdict from the measurements, suggests colours (used
+        only if they pass the contrast maths), and runs Cog's buying agent.
+      </li>
+      <li>
+        <b>Every number is measured by the browser</b> on the live page. The AI explains; it never
+        makes up a measurement.
+      </li>
+    </ul>
+
+    <h2>Things you might notice</h2>
+    <ul>
+      <li>
+        <b>"Wick's standard notes, written without AI."</b> Gemini runs on its free tier, which has
+        a daily limit. When it's used up or Google is busy, Sentinel uses its own built-in notes and
+        says so on screen, and Cog uses the ordinary checkout instead of its agent. Everything else
+        works the same.
+      </li>
+      <li>
+        <b>No PayPal button in the payment form.</b> PayPal accounts, including developer sandbox
+        accounts, aren't available to developers in Pakistan, where Sentinel was built, so no
+        PayPal account could be linked to the Braintree sandbox. Cards work. The PayPal button is
+        wired in and turns on with one setting once an account is linked.
+      </li>
+      <li>
+        <b>Records stay in your browser.</b> There are no accounts, so the ledger shows the trials
+        run in your own browser.
+      </li>
+    </ul>
+
+    <h2>Safety, enforced in code</h2>
+    <ul>
+      <li>
+        Trials run only on our demo store, or on sites whose owner added Sentinel's line of code
+        with a signed key. On owners' sites the shoppers only look: they never type, pay or buy.
+      </li>
+      <li>Sandbox only: a live payments setting makes the app refuse to start.</li>
+      <li>Only fixes from a fixed allow-list can ever be applied to a page.</li>
+    </ul>
+  </body>
+</html>
