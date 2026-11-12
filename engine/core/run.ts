@@ -339,7 +339,9 @@ async function walk(
 
   /** Checks the page. Returns the description of an element this shopper cannot use at all, if there is one on their path. */
   const inspect = async (scene: Scene): Promise<string | null> => {
-    await settle(200, 1500);
+    // A walk can resume on a page that is still loading. Measure the finished page.
+    await clock.waitFor(() => document.readyState === "complete", 20_000);
+    await settle(300, 2000);
     applier.apply();
     let barrier: string | null = null;
     const results = await character.checks({
