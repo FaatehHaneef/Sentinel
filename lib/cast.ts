@@ -49,7 +49,7 @@ export const CAST: readonly Character[] = [
       "Risky buttons side by side",
       "Controls that need precision",
     ],
-    ready: false,
+    ready: true,
     accent: "moss",
   },
   {

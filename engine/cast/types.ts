@@ -1,6 +1,7 @@
 import type { CharacterId } from "@/lib/cast";
 import type { CheckContext, CheckResult } from "../checks/types";
 import type { Animation } from "../hud/stage";
+import type { Shopper } from "../journeys/types";
 
 /** Everything the engine needs to play one character. */
 export type EngineCharacter = {
@@ -20,5 +21,5 @@ export type EngineCharacter = {
   /** Said on a re-run, at a place that was a snag last time and is not any more. */
   onFixed: string;
   /** Details the character types at checkout. */
-  shopper: { name: string; email: string };
+  shopper: Shopper;
 };

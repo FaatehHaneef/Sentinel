@@ -52,9 +52,9 @@ export const IRIS_FRAMES: Record<string, readonly string[]> = {
   walk1: withRows(IDLE, { 22: "....BB...BBB....", 23: "...BBB.........." }),
   walk2: withRows(IDLE, { 22: "...BBB....BB....", 23: "..........BBB..." }),
   // Squinting: eyes narrowed to nothing behind the lenses, mouth tight.
-  squint: withRows(IDLE, { 8: "..HSGsGGGGsGSH..", 11: "...sSSMMMMSSs..." }),
+  worry: withRows(IDLE, { 8: "..HSGsGGGGsGSH..", 11: "...sSSMMMMSSs..." }),
   // Pushing her glasses up: glasses one row higher, one hand raised to them.
-  push: withRows(IDLE, {
+  fuss: withRows(IDLE, {
     6: "..HhGGGSSGGGhH..",
     7: "..HSGWGGGGWGSHS.",
     8: "..HSGGGSSGGGSHS.",

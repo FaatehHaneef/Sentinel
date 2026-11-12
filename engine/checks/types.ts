@@ -1,7 +1,11 @@
 import type { Finding, Severity } from "@/lib/trial/types";
 
 /** A finding together with the element it was measured on. */
-export type Located = Finding & { element: Element };
+export type Located = Finding & {
+  element: Element;
+  /** Where simulated taps landed, in viewport coordinates, for showing on the page. */
+  taps?: { x: number; y: number; hit: boolean }[];
+};
 
 export type CheckResult = {
   /** Check id, for example "iris.contrast". */
@@ -16,6 +20,8 @@ export type CheckResult = {
 export type CheckContext = {
   /** Elements the shopper has to use on this page to complete the purchase. */
   pathElements: Element[];
+  /** The seed of the run, so anything simulated is repeatable. */
+  seed: number;
 };
 
 export function isOnPath(element: Element, context: CheckContext): boolean {

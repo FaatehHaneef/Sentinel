@@ -18,6 +18,9 @@ export const ALLOWED_PROPERTIES = [
   "font-weight",
   "text-decoration",
   "padding",
+  "margin",
+  "margin-left",
+  "margin-right",
   "min-width",
   "min-height",
 ] as const;

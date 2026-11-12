@@ -1,13 +1,16 @@
 import type { SpriteSheet } from "../art/sprite";
 import type { Clock } from "../core/clock";
 
-export type Animation = "idle" | "walk" | "squint" | "push" | "happy";
+/** Every character supplies frames named idle, walk1, walk2, worry, fuss and happy. */
+export type Animation = "idle" | "walk" | "worry" | "fuss" | "shake" | "happy";
 
 const SEQUENCES: Record<Animation, { frames: string[]; perSecond: number }> = {
   idle: { frames: ["idle"], perSecond: 1 },
   walk: { frames: ["walk1", "idle", "walk2", "idle"], perSecond: 8 },
-  squint: { frames: ["squint"], perSecond: 1 },
-  push: { frames: ["push", "push", "idle"], perSecond: 3 },
+  worry: { frames: ["worry"], perSecond: 1 },
+  fuss: { frames: ["fuss", "fuss", "idle"], perSecond: 3 },
+  // Trembling: the two reaction frames in quick alternation.
+  shake: { frames: ["worry", "fuss"], perSecond: 10 },
   happy: { frames: ["happy"], perSecond: 1 },
 };
 
@@ -146,6 +149,22 @@ export class Stage {
     }
   }
 
+  /** Marks where a run of shaky taps landed: green for a hit, red for a miss. */
+  showTaps(points: { x: number; y: number; hit: boolean }[]): void {
+    for (const point of points) {
+      this.particles.push({
+        x: point.x - 3,
+        y: point.y - 3,
+        vx: 0,
+        vy: 0,
+        life: 2.2,
+        colour: point.hit ? "#6fae75" : "#e05a6d",
+        size: 6,
+        gravity: 0,
+      });
+    }
+  }
+
   /** A small burst of light for something that went right. */
   sparkle(): void {
     if (this.reducedMotion) return;
@@ -231,7 +250,7 @@ export class Stage {
     const bob = this.animation === "walk" && Math.floor(this.animationClock * 8) % 2 ? -2 : 0;
 
     // Ghosts of the previous trial, drawn first so the character walks in front of them.
-    const ghostFrame = this.sprite.frames.squint ?? frame;
+    const ghostFrame = this.sprite.frames.worry ?? frame;
     if (this.spotFor) {
       for (const ghost of this.ghosts) {
         const spot = this.spotFor(ghost.element);

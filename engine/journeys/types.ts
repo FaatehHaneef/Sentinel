@@ -1,3 +1,6 @@
+/** Who is shopping: the details they type at checkout and how many they want. */
+export type Shopper = { name: string; email: string; quantity: number };
+
 /** What a character can do on the page. Every action is paced, visible and logged. */
 export type Actor = {
   /** Walks to an element and stands beside it. */
@@ -5,7 +8,7 @@ export type Actor = {
   click(element: HTMLElement, description: string): Promise<void>;
   type(field: HTMLInputElement, value: string, description: string): Promise<void>;
   waitFor<T>(probe: () => T | null | undefined | false, timeoutMs: number): Promise<T | null>;
-  shopper: { name: string; email: string };
+  shopper: Shopper;
 };
 
 /** One stretch of the road to a purchase. */
@@ -18,7 +21,7 @@ export type Scene = {
   /** True when the page is currently showing this scene. */
   match(): boolean;
   /** The elements a shopper must use here to move on. */
-  path(): Element[];
+  path(shopper: Shopper): Element[];
   /** Does what a shopper does to move on. */
   advance(actor: Actor): Promise<void>;
   /** True for the last scene: reaching it means the purchase is complete. */
@@ -26,8 +29,8 @@ export type Scene = {
 };
 
 export type Journey = {
-  /** Price of what the shopper sets out to buy, in cents. Sets the size of the purse. */
-  cartCents: number;
+  /** Price of one of what the shopper sets out to buy, in cents. The purse is this times the quantity. */
+  unitCents: number;
   scenes: Scene[];
   /** Clears anything left over from an earlier walk. */
   prepare(): void;
