@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ECHO_FRAMES, ECHO_PALETTE } from "@/engine/art/echo";
 import { IRIS_FRAMES, IRIS_PALETTE } from "@/engine/art/iris";
 import { KNOCK_FRAMES, KNOCK_PALETTE } from "@/engine/art/knock";
+import { PELL_FRAMES, PELL_PALETTE } from "@/engine/art/pell";
 import { TOBIN_FRAMES, TOBIN_PALETTE } from "@/engine/art/tobin";
 
 const SHEETS = {
@@ -9,6 +10,7 @@ const SHEETS = {
   tobin: { frames: TOBIN_FRAMES, palette: TOBIN_PALETTE },
   knock: { frames: KNOCK_FRAMES, palette: KNOCK_PALETTE },
   echo: { frames: ECHO_FRAMES, palette: ECHO_PALETTE },
+  pell: { frames: PELL_FRAMES, palette: PELL_PALETTE },
 };
 
 /** Every character must supply these, because the stage animates them by name. */

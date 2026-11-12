@@ -58,14 +58,12 @@ export const CAST: readonly Character[] = [
     represents: "A shopper on a slow rural connection",
     motto: "One bar. Long road.",
     checks: [
-      "Page weight",
       "Projected wait on a slow connection",
-      "Time until the main content shows",
+      "Pictures heavier than they need to be",
       "Layout that jumps around",
-      "Images that hold things up",
-      "Feedback while waiting",
+      "Pictures loaded before they are needed",
     ],
-    ready: false,
+    ready: true,
     accent: "mist",
   },
   {

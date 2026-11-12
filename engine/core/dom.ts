@@ -87,6 +87,10 @@ export function visibleLabel(field: Element): string {
 /** A short description of an element, in words a shop owner would use. */
 export function describe(element: Element): string {
   const tag = element.tagName.toLowerCase();
+  if (tag === "img") {
+    const alt = element.getAttribute("alt")?.trim();
+    return alt ? `"${shorten(alt)}" picture` : "Picture";
+  }
   if (tag === "input" || tag === "textarea" || tag === "select") {
     const type = (element.getAttribute("type") ?? "").toLowerCase();
     if (type === "submit" || type === "button") {

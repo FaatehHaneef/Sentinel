@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CAST, type Character, type CharacterId } from "@/lib/cast";
+import { writeStoreFixes } from "@/lib/store/variants";
 
 const ACCENT_TEXT: Record<Character["accent"], string> = {
   amber: "text-amber",
@@ -42,6 +43,8 @@ export function PartyPicker() {
     try {
       // Keep the party in cast order, whatever order it was picked in.
       const ordered = CAST.map((character) => character.id).filter((id) => party.includes(id));
+      // A new trial always meets the demo store as it is, with no store fixes switched on.
+      writeStoreFixes(window.localStorage, []);
       window.location.assign(await startTrial(ordered));
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : "The trial could not start.");

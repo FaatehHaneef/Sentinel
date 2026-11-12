@@ -1,3 +1,4 @@
+import { isStoreFixId, STORE_FIX_ADVICE } from "@/lib/store/variants";
 import type { AppliedFix, CssChange, Fix } from "./types";
 
 /**
@@ -41,6 +42,7 @@ const ATTRIBUTE_RULES: Record<string, (value: string) => boolean> = {
   role: (value) => ["button", "link", "img"].includes(value),
   "aria-label": (value) => value.length > 0 && value.length <= 120,
   alt: (value) => value.length <= 160,
+  loading: (value) => value === "lazy",
   lang: (value) => /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(value),
 };
 
@@ -98,13 +100,16 @@ export function sanitizeFix(fix: unknown): Fix | null {
   const hasAttributes = Object.keys(attributes).length > 0;
   const keyboard = input.keyboard === true;
 
-  if (css.length === 0 && !label && !hasAttributes && !keyboard) return null;
+  const storeFix = isStoreFixId(input.storeFix) ? input.storeFix : undefined;
+
+  if (css.length === 0 && !label && !hasAttributes && !keyboard && !storeFix) return null;
   return {
     summary: typeof input.summary === "string" ? input.summary.slice(0, 200) : "Suggested fix",
     css: css.length > 0 ? css : undefined,
     label,
     attributes: hasAttributes ? attributes : undefined,
     keyboard: keyboard || undefined,
+    storeFix,
     source: input.source === "ai" ? "ai" : "rule",
   };
 }
@@ -144,6 +149,7 @@ export function fixToCss(selector: string, fix: Fix, important = false): string 
 /** The fix as the code a developer would write, for showing on the results page. */
 export function fixToSnippet(selector: string, fix: Fix): string {
   const parts: string[] = [];
+  if (fix.storeFix) parts.push(STORE_FIX_ADVICE[fix.storeFix].snippet);
   if (fix.label) {
     parts.push(
       `<!-- Add a visible label above the field -->\n<label for="field-id">${fix.label}</label>\n<input id="field-id" … />`,

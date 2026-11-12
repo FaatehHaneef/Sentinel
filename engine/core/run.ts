@@ -1,4 +1,5 @@
 import { getCharacter, type CharacterId } from "@/lib/cast";
+import { writeStoreFixes } from "@/lib/store/variants";
 import {
   coinCost,
   passXp,
@@ -12,6 +13,7 @@ import { buildSprite } from "../art/sprite";
 import { Sfx } from "../audio/sfx";
 import { iris } from "../cast/iris";
 import { knock } from "../cast/knock";
+import { pell } from "../cast/pell";
 import { tobin } from "../cast/tobin";
 import { echo } from "../cast/echo";
 import type { EngineCharacter } from "../cast/types";
@@ -31,7 +33,13 @@ import {
   type PreviousSnag,
 } from "./state";
 
-const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris, tobin, knock, echo };
+const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = {
+  iris,
+  tobin,
+  pell,
+  knock,
+  echo,
+};
 
 /** How long the character lingers on a snag, in trial time. */
 const SNAG_PAUSE_MS = 1500;
@@ -83,6 +91,8 @@ export async function runTrial(
     saveRecord(state, true, applier.applied);
     clearState();
     applier.stop();
+    // Store fixes last for one trial: afterwards the demo store goes back to how it was.
+    if (state.config.kind === "own") writeStoreFixes(window.localStorage, []);
     const snags = state.events.filter((event) => event.type === "snag").length;
     const fixed = state.events.filter((event) => event.type === "fixed").length;
     const purchases = state.events.filter((event) => event.type === "purchase").length;
@@ -318,7 +328,7 @@ async function walk(
     await settle(200, 1500);
     applier.apply();
     let barrier: string | null = null;
-    const results = character.checks({
+    const results = await character.checks({
       pathElements: scene.path(character.shopper),
       seed: state.config.seed,
     });
@@ -333,7 +343,9 @@ async function walk(
       for (const located of result.findings) {
         const key = `${located.check}|${located.selector}`;
         failing.add(key);
-        if (located.stops && located.onPath) barrier ??= located.label;
+        if (located.stops && located.onPath) {
+          barrier ??= located.stopReason ?? `could not use the ${located.label}`;
+        }
         // Furniture that repeats on every page (header, footer) is reported the first time only.
         if (progress.seen.includes(key)) continue;
         progress.seen.push(key);
@@ -437,7 +449,7 @@ async function walk(
     }
 
     if (barrier) {
-      await abandon(scene.id, `could not use the ${barrier}`);
+      await abandon(scene.id, barrier);
       return;
     }
 

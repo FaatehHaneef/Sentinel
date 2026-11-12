@@ -1,4 +1,5 @@
 import type { CharacterId } from "@/lib/cast";
+import type { StoreFixId } from "@/lib/store/variants";
 
 /**
  * Shared vocabulary for a trial. The engine that runs inside the tested page
@@ -41,6 +42,8 @@ export type Fix = {
   attributes?: Record<string, string>;
   /** Make the element respond to Enter and Space as a button does. */
   keyboard?: boolean;
+  /** A change to the demo store's own code, switched on in this browser for the re-run. */
+  storeFix?: StoreFixId;
   /** rule: computed from the measurement. ai: a colour suggested by AI and checked by the same maths. */
   source: "rule" | "ai";
 };
