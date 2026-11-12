@@ -60,7 +60,7 @@ test("Iris finds the planted snags in the details form and leaves", async ({ pag
 
   await resultsLink.click();
   await expect(page.getByRole("heading", { name: "Trial results" })).toBeVisible();
-  await expect(page.getByText("Left without buying")).toBeVisible();
+  await expect(page.getByText("Left without buying", { exact: true })).toBeVisible();
 });
 
 test("a trial cannot start without a launch token from the server", async ({ page, request }) => {
