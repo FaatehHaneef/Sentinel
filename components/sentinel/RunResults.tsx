@@ -37,6 +37,7 @@ const OUTCOME_TEXT: Record<CharacterSummary["outcome"], string> = {
   purchased: "Completed the purchase",
   abandoned: "Left without buying",
   stopped: "Trial ended early",
+  observed: "Looked around and reported",
   running: "Trial did not finish",
 };
 
@@ -401,11 +402,15 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
     }
   }
 
+  const ownSite = record.config.kind === "verified";
+  const canTry = !ownSite && chosen.length > 0;
+
   return (
     <>
       <h1 className="font-display text-4xl font-bold text-parchment sm:text-5xl">Trial results</h1>
       <p className="mt-3 text-lg text-mist">
-        Tallowmere demo store, {new Date(record.startedAt).toLocaleString()}
+        {ownSite ? record.config.origin : "Tallowmere demo store"},{" "}
+        {new Date(record.startedAt).toLocaleString()}
         {record.config.previousRunId ? ". A re-run with fixes applied." : ""}
       </p>
       <p className="mt-2 max-w-2xl text-mist">
@@ -431,7 +436,13 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
       </div>
 
       <div className="sticky bottom-0 mt-8 flex flex-wrap items-center gap-4 border-t-2 border-slate bg-night/95 py-4">
-        {chosen.length > 0 ? (
+        {ownSite ? (
+          <p className="w-full text-sm text-mist">
+            On your own site the shoppers only look. The fixes above are code to copy into your
+            site; trying fixes live and re-running works on the demo store.
+          </p>
+        ) : null}
+        {canTry ? (
           <button
             type="button"
             onClick={tryFixes}
@@ -449,7 +460,7 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
         <Link href="/ledger" className="font-bold text-amber underline underline-offset-4">
           The ledger
         </Link>
-        {chosen.length > 0 ? (
+        {canTry ? (
           <p className="w-full text-sm text-mist">
             The fixes are tried on the page in your browser only. Nothing on the shop is changed.
           </p>

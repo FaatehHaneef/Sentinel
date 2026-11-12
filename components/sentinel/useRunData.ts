@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { CharacterSummary } from "@/lib/trial/scoring";
+import { decodeRecord, RECORD_FRAGMENT } from "@/lib/trial/transfer";
 import { RUN_STORAGE_PREFIX, type RunRecord } from "@/lib/trial/types";
 import {
   buildVerdictRequest,
@@ -13,6 +14,23 @@ import {
 const noSubscription = () => () => {};
 
 /**
+ * A trial on an owner's own site hands its record over in the address
+ * fragment. Keep it in this browser, then take it out of the address.
+ */
+function importFromAddress(id: string): void {
+  if (!window.location.hash.includes(RECORD_FRAGMENT)) return;
+  const record = decodeRecord(window.location.hash, id);
+  window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  if (!record) return;
+  try {
+    window.localStorage.setItem(RUN_STORAGE_PREFIX + id, JSON.stringify(record));
+    window.localStorage.setItem(`${RUN_STORAGE_PREFIX}latest`, id);
+  } catch {
+    // Without storage the record cannot be kept.
+  }
+}
+
+/**
  * Reads a trial record from this browser's storage.
  * undefined: not read yet. null: there is no such record.
  */
@@ -22,6 +40,7 @@ export function useRunRecord(id: string | undefined): RunRecord | null | undefin
     noSubscription,
     () => {
       if (!id) return null;
+      importFromAddress(id);
       try {
         return window.localStorage.getItem(RUN_STORAGE_PREFIX + id);
       } catch {
