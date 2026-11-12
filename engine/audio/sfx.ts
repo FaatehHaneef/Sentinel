@@ -37,11 +37,30 @@ export class Sfx {
   private context: AudioContext | null = null;
   enabled = false;
 
-  /** Must be called from a click or key press. */
+  /**
+   * Turns sound on. Browsers only let a page play sound once the person has
+   * clicked or pressed a key on it, so if sound is held back now it starts at
+   * the first click or key press on the page.
+   */
   enable(): void {
-    this.context ??= new AudioContext();
-    void this.context.resume();
+    try {
+      this.context ??= new AudioContext();
+    } catch {
+      return;
+    }
     this.enabled = true;
+    const context = this.context;
+    void context.resume().catch(() => undefined);
+    if (context.state === "running") return;
+    const unlock = () => {
+      void context.resume().catch(() => undefined);
+      if (context.state === "running") {
+        window.removeEventListener("pointerdown", unlock, true);
+        window.removeEventListener("keydown", unlock, true);
+      }
+    };
+    window.addEventListener("pointerdown", unlock, true);
+    window.addEventListener("keydown", unlock, true);
   }
 
   disable(): void {
