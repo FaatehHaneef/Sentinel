@@ -31,13 +31,20 @@ button[hidden] { display: none; }
 .highlight.on { display: block; }
 .highlight.bad { border-color: #e05a6d; box-shadow: 0 0 0 3px rgba(18, 21, 42, 0.55), 0 0 18px rgba(224, 90, 109, 0.75); }
 .panel {
-  position: absolute; top: 12px; right: 12px; width: 320px; max-height: calc(100% - 24px);
+  position: absolute; width: 320px; max-height: calc(100% - 24px);
+  transition: top 220ms ease-out, left 220ms ease-out, right 220ms ease-out, bottom 220ms ease-out;
   display: flex; flex-direction: column; gap: 10px; padding: 12px;
   background: #1b1f3b; border: 3px solid #ffb347; border-radius: 6px;
   box-shadow: 0 6px 0 #12152a, 0 12px 28px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
 }
-.panel.left { right: auto; left: 12px; }
+.panel[data-corner="top-right"] { top: 12px; right: 12px; }
+.panel[data-corner="top-left"] { top: 12px; left: 12px; }
+.panel[data-corner="bottom-right"] { bottom: 12px; right: 12px; }
+.panel[data-corner="bottom-left"] { bottom: 12px; left: 12px; }
+.panel.finished .meters, .panel.finished .feed, .panel.finished .say { display: none; }
+.panel.tucked .who, .panel.tucked .summary p { display: none; }
+.panel.tucked { width: 240px; }
 .who { display: flex; gap: 10px; align-items: center; }
 .portrait {
   width: 64px; height: 96px; flex: none; image-rendering: pixelated;
@@ -76,27 +83,43 @@ button[hidden] { display: none; }
 .feed button.jump {
   all: unset; cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
 }
-.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.controls { display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; gap: 6px; }
+.row > button { flex: 1 1 0; min-width: 0; }
+.row > button[hidden] { display: none; }
 .controls button, .summary a {
-  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 9px;
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; padding: 8px 9px;
   color: #f3e9d2; background: #2e3a5c; border: 2px solid #8fa3bf; border-radius: 4px; text-decoration: none;
+  box-shadow: 0 3px 0 #12152a; transition: transform 60ms ease-out;
 }
-.controls button[aria-pressed="true"] { background: #ffb347; color: #1b1f3b; border-color: #ffb347; }
+.controls button:active { transform: translateY(2px); box-shadow: 0 1px 0 #12152a; }
+.row.primary > button {
+  font-size: 14px; padding: 10px 9px; background: #ffb347; color: #1b1f3b; border-color: #ffe08a;
+}
+.row.primary > button[aria-pressed="true"] { background: #e8743b; color: #12152a; border-color: #ffb347; }
+.controls button.icon {
+  flex: 0 0 44px; display: flex; align-items: center; justify-content: center; padding: 6px;
+}
+.controls button.icon[aria-pressed="true"] { color: #ffb347; }
+.controls button.stop { border-color: #e05a6d; }
 .controls button:hover, .summary a:hover { border-color: #ffb347; }
 button:focus-visible, a:focus-visible { outline: 3px solid #ffb347; outline-offset: 2px; }
 .summary { display: none; flex-direction: column; gap: 8px; padding: 10px; background: #12152a; border-radius: 4px; }
 .summary.on { display: flex; }
 .summary h2 { margin: 0; font-size: 16px; color: #ffb347; }
 .summary p { margin: 0; font-size: 13px; }
+.summary .earned { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.summary .earned li { color: #ffe08a; font-weight: 700; font-size: 13px; }
+.panel.tucked .summary .earned { display: none; }
 .summary a { align-self: flex-start; background: #ffb347; color: #1b1f3b; border-color: #ffb347; font-size: 13px; }
 @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 @media (max-width: 720px) {
-  .panel, .panel.left { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 46%; }
+  .panel, .panel[data-corner] { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 46%; }
   .portrait { width: 40px; height: 60px; }
   .feed { max-height: 120px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .feed li { animation: none; }
-  .highlight, .meter .bar i { transition: none; }
+  .highlight, .meter .bar i, .panel { transition: none; }
 }
 `;

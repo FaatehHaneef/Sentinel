@@ -107,14 +107,8 @@ export async function runTrial(
     // The store's progress across every trial kept in this browser.
     const records = readAllRecords(window.localStorage);
     const level = levelFor(totalXp(records));
-    for (const achievement of newlyEarned(records, state.config.runId)) {
-      hud.feed({
-        kind: "good",
-        text: `Achievement: ${achievement.name}`,
-        detail: achievement.description,
-      });
-      sfx.play("purchase");
-    }
+    const earned = newlyEarned(records, state.config.runId);
+    if (earned.length > 0) sfx.play("purchase");
 
     hud.showSummary(
       title,
@@ -130,6 +124,7 @@ export async function runTrial(
             : `${apiBase}/runs/${state.config.runId}#${RECORD_FRAGMENT}${encodeRecord(record)}`,
         label: "See the full results",
       },
+      earned.map((achievement) => achievement.name),
     );
   };
 
@@ -218,11 +213,12 @@ async function walk(
   const spotFor = (element: Element): { x: number; y: number } => {
     const rect = element.getBoundingClientRect();
     const half = 8 * SPRITE_SCALE;
-    const reserved = hud.reserved;
+    const y = Math.max(24 * SPRITE_SCALE + 8, Math.min(rect.bottom + 6, window.innerHeight - 12));
+    // The character never stands under the card.
+    const reserved = hud.reservedAt(y);
     const minX = reserved.left + half + 8;
     const maxX = window.innerWidth - reserved.right - half - 8;
     const x = Math.max(minX, Math.min(rect.left - half - 10, maxX));
-    const y = Math.max(24 * SPRITE_SCALE + 8, Math.min(rect.bottom + 6, window.innerHeight - 12));
     return { x, y };
   };
   stage.setSpotResolver(spotFor);
@@ -393,8 +389,8 @@ async function walk(
       }
     }
 
-    // What the last trial found here: a ghost stands at each place, and
-    // anything no longer failing counts as fixed.
+    // What the last trial found here: anything no longer failing counts as
+    // fixed, and each place gets a ghost when the character reaches it.
     const before = state.previous.filter(
       (snag) => snag.character === character.id && snag.scene === scene.id,
     );
@@ -412,15 +408,16 @@ async function walk(
         });
       }
     }
-    stage.setGhosts([...ghosts]);
 
     stops.sort((a, b) => documentTop(a.element) - documentTop(b.element));
     for (const stop of stops) {
+      // One ghost at a time, only at the place being checked now.
+      stage.showGhost(ghosts.has(stop.element) ? stop.element : null);
       if (stop.kind === "snag") await reportSnag(scene, stop.located, titleOf(stop.located.check));
       else await reportFixed(scene, stop.element, stop.previous, titleOf(stop.previous.check));
     }
     hud.highlight(null);
-    stage.setGhosts([]);
+    stage.showGhost(null);
 
     for (const result of cleanChecks) {
       const xp = passXp(result.weight);
