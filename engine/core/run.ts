@@ -1,5 +1,6 @@
 import { getCharacter, type CharacterId } from "@/lib/cast";
 import { writeStoreFixes } from "@/lib/store/variants";
+import { levelFor, newlyEarned, readAllRecords, totalXp } from "@/lib/trial/progress";
 import {
   coinCost,
   passXp,
@@ -101,11 +102,25 @@ export async function runTrial(
     const fixed = state.events.filter((event) => event.type === "fixed").length;
     const purchases = state.events.filter((event) => event.type === "purchase").length;
     const shoppers = state.config.party.length;
+
+    // The store's progress across every trial kept in this browser.
+    const records = readAllRecords(window.localStorage);
+    const level = levelFor(totalXp(records));
+    for (const achievement of newlyEarned(records, state.config.runId)) {
+      hud.feed({
+        kind: "good",
+        text: `Achievement: ${achievement.name}`,
+        detail: achievement.description,
+      });
+      sfx.play("purchase");
+    }
+
     hud.showSummary(
       title,
       `${purchases} of ${shoppers} ${shoppers === 1 ? "shopper" : "shoppers"} completed a purchase. ` +
         `${snags} ${snags === 1 ? "snag" : "snags"} found` +
-        (fixed > 0 ? `, ${fixed} fixed since last time.` : "."),
+        (fixed > 0 ? `, ${fixed} fixed since last time. ` : ". ") +
+        `Store level ${level.level}: ${level.rank}.`,
       { href: `${apiBase}/runs/${state.config.runId}`, label: "See the full results" },
     );
   };

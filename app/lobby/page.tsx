@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PartyPicker } from "@/components/sentinel/PartyPicker";
+import { StoreProgress } from "@/components/sentinel/StoreProgress";
 
 export const metadata: Metadata = {
   title: "The shoppers | Sentinel",
@@ -20,6 +21,9 @@ export default function LobbyPage() {
         experiences it. Pick who walks the road, then watch them try to buy a candle.
       </p>
       <PartyPicker />
+      <div className="mt-12">
+        <StoreProgress />
+      </div>
     </main>
   );
 }
