@@ -44,7 +44,18 @@ export default function CheckoutPage() {
         const instance = await braintreeDropin.create({
           authorization: clientToken,
           container: target,
-          paypal: { flow: "checkout", amount: (totalCents / 100).toFixed(2), currency: "USD" },
+          // PayPal in the form needs a PayPal sandbox account linked to Braintree.
+          // Those aren't available from Pakistan, where Sentinel was built, so
+          // it stays off unless a linked account exists. Cards always work.
+          ...(process.env.NEXT_PUBLIC_PAYPAL_ENABLED === "true"
+            ? {
+                paypal: {
+                  flow: "checkout" as const,
+                  amount: (totalCents / 100).toFixed(2),
+                  currency: "USD",
+                },
+              }
+            : {}),
         });
         if (cancelled) {
           await instance.teardown();
