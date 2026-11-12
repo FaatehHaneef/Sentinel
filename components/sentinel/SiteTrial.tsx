@@ -91,7 +91,7 @@ export function SiteTrial() {
 
   return (
     <div className="space-y-8">
-      <form onSubmit={register} className="rounded-lg border-2 border-slate bg-indigo/80 p-6">
+      <form onSubmit={register} className="pixel-panel">
         <h2 className="font-display text-2xl font-bold text-parchment">1. Your site</h2>
         <label className="mt-4 block text-parchment">
           Your site&apos;s address
@@ -105,17 +105,13 @@ export function SiteTrial() {
             required
           />
         </label>
-        <button
-          type="submit"
-          disabled={busy}
-          className="mt-4 rounded bg-amber px-5 py-2 font-bold text-indigo disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy} className="pixel-button mt-4">
           Get my line of code
         </button>
       </form>
 
       {site ? (
-        <section className="rounded-lg border-2 border-slate bg-indigo/80 p-6">
+        <section className="pixel-panel">
           <h2 className="font-display text-2xl font-bold text-parchment">2. Paste this into it</h2>
           <p className="mt-2 text-mist">
             Add this line to every page of <strong className="text-parchment">{site.origin}</strong>
@@ -135,7 +131,7 @@ export function SiteTrial() {
                 setCopied(false);
               }
             }}
-            className="mt-3 rounded border-2 border-amber px-4 py-2 font-bold text-amber"
+            className="pixel-button quiet mt-3"
           >
             {copied ? "Copied" : "Copy the line"}
           </button>
@@ -143,7 +139,7 @@ export function SiteTrial() {
       ) : null}
 
       {site ? (
-        <section className="rounded-lg border-2 border-slate bg-indigo/80 p-6">
+        <section className="pixel-panel">
           <h2 className="font-display text-2xl font-bold text-parchment">3. Send your shoppers</h2>
           <p className="mt-2 text-mist">
             On your own site the shoppers only look: they check the page they land on, react, and
@@ -175,7 +171,7 @@ export function SiteTrial() {
             type="button"
             onClick={start}
             disabled={busy || party.length === 0}
-            className="font-display mt-5 rounded border-b-4 border-ember bg-amber px-6 py-3 text-lg font-bold text-indigo disabled:opacity-50"
+            className="pixel-button mt-5 text-lg"
           >
             Open my site and start the trial
           </button>

@@ -149,7 +149,7 @@ export function Ledger() {
 
   return (
     <div className="space-y-10">
-      <section aria-labelledby="ledger-heading">
+      <section aria-labelledby="ledger-heading" className="pixel-panel">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 id="ledger-heading" className="font-display text-2xl font-bold text-parchment">
@@ -189,7 +189,7 @@ export function Ledger() {
         </div>
       </section>
 
-      <section aria-labelledby="history-heading">
+      <section aria-labelledby="history-heading" className="pixel-panel">
         <h2 id="history-heading" className="font-display text-2xl font-bold text-parchment">
           Trials
         </h2>

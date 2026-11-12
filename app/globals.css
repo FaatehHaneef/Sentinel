@@ -32,21 +32,96 @@
 }
 
 html {
-  background: var(--color-night);
-  color: var(--color-parchment);
+  background: #12152a;
+  color: #f3e9d2;
 }
 
 body {
   font-family: var(--font-body), system-ui, sans-serif;
   background:
     radial-gradient(ellipse 80% 50% at 50% 100%, #3a2f52 0%, transparent 70%),
-    linear-gradient(180deg, var(--color-night) 0%, var(--color-indigo) 60%, #2a2748 100%);
+    linear-gradient(180deg, #12152a 0%, #1b1f3b 60%, #2a2748 100%);
   background-attachment: fixed;
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-amber);
+  outline: 3px solid #ffb347;
   outline-offset: 3px;
+}
+
+/* The pixel font has no joined letters: "fi" must stay two letters. */
+.font-display,
+.pixel-button,
+.stamp {
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "clig" 0;
+}
+
+/* Game furniture: framed panels and chunky buttons that press down. */
+.pixel-panel {
+  background: #1b1f3b;
+  border: 3px solid #2e3a5c;
+  box-shadow:
+    0 0 0 3px #12152a,
+    6px 6px 0 3px #12152a;
+  padding: 1.5rem;
+}
+.pixel-panel.flush {
+  padding: 0;
+}
+.pixel-panel.lit {
+  border-color: #ffb347;
+}
+.pixel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-pixel), monospace;
+  font-weight: 700;
+  color: #1b1f3b;
+  background: #ffb347;
+  border: 3px solid #12152a;
+  box-shadow:
+    inset -4px -4px 0 #e8743b,
+    inset 4px 4px 0 #ffe08a,
+    4px 4px 0 #12152a;
+  padding: 0.75rem 1.5rem;
+  transition: transform 60ms ease-out;
+}
+.pixel-button:hover {
+  filter: brightness(1.06);
+}
+.pixel-button:active {
+  transform: translate(3px, 3px);
+  box-shadow:
+    inset -4px -4px 0 #e8743b,
+    inset 4px 4px 0 #ffe08a,
+    1px 1px 0 #12152a;
+}
+.pixel-button:disabled {
+  opacity: 0.55;
+  transform: none;
+}
+.pixel-button.quiet {
+  color: #f3e9d2;
+  background: #2e3a5c;
+  box-shadow:
+    inset -4px -4px 0 #1f2747,
+    inset 4px 4px 0 #46557f,
+    4px 4px 0 #12152a;
+}
+.stamp {
+  display: inline-block;
+  font-family: var(--font-pixel), monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 3px solid currentColor;
+  padding: 0.25rem 0.75rem;
+  transform: rotate(-4deg);
 }
 
 /* Crisp edges for pixel art. */

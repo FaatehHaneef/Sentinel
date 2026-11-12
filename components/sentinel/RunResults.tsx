@@ -18,6 +18,7 @@ import {
 } from "@/lib/trial/types";
 import { withSuggestedColour, type Verdict } from "@/lib/trial/verdict";
 import { RevenueEstimate, RevenueInputsForm } from "./RevenueEstimate";
+import { Sprite } from "./Sprite";
 import { StoreProgress } from "./StoreProgress";
 import { sceneNames, useRunRecord, useVerdicts, type VerdictState } from "./useRunData";
 
@@ -129,13 +130,48 @@ function CharacterResult({
   const good = summary.outcome === "purchased";
 
   return (
-    <section className="rounded-lg border-2 border-slate bg-indigo/80 p-6">
-      <h2 className="font-display text-3xl font-bold text-amber">{character.name}</h2>
-      <p className="text-mist">{character.represents}</p>
+    <section className="pixel-panel">
+      <div className="flex flex-wrap items-center gap-5">
+        <div className="flex h-28 w-20 flex-none items-end justify-center border-2 border-slate bg-night">
+          <Sprite
+            id={summary.character}
+            scale={4}
+            mood={good ? "happy" : summary.outcome === "abandoned" ? "worry" : "idle"}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-3xl font-bold text-amber">{character.name}</h2>
+          <p className="text-mist">{character.represents}</p>
+          <p
+            className={`stamp mt-3 text-lg ${good ? "text-moss" : summary.outcome === "observed" ? "text-mist" : "text-rose"}`}
+          >
+            {OUTCOME_TEXT[summary.outcome]}
+          </p>
+        </div>
+      </div>
 
-      <p className={`mt-4 text-2xl font-bold ${good ? "text-moss" : "text-rose"}`}>
-        {OUTCOME_TEXT[summary.outcome]}
-      </p>
+      {purse > 0 ? (
+        <div className="mt-5">
+          <div
+            className="flex h-4 w-full overflow-hidden border-2 border-night bg-night"
+            role="img"
+            aria-label={`${summary.coinsLeft} of ${purse} coins kept, ${summary.coinsLost} lost`}
+          >
+            <span
+              className="h-full bg-amber"
+              style={{ width: `${(summary.coinsLeft / purse) * 100}%` }}
+            />
+            <span
+              className="h-full bg-rose"
+              style={{ width: `${(summary.coinsLost / purse) * 100}%` }}
+            />
+          </div>
+          <p className="mt-1 text-sm text-mist">
+            <span className="text-amber">■</span> {summary.coinsLeft} coins kept ·{" "}
+            <span className="text-rose">■</span> {summary.coinsLost} lost
+          </p>
+        </div>
+      ) : null}
 
       <VerdictCard state={verdict} />
 
@@ -267,7 +303,7 @@ function AppliedFixes({ record }: { record: RunRecord }) {
     .join("\n\n");
   const labels = fixes.filter(({ fix }) => fix.label);
   return (
-    <section className="rounded-lg border-2 border-moss bg-indigo/80 p-6">
+    <section className="pixel-panel" style={{ borderColor: "#6fae75" }}>
       <h2 className="font-display text-2xl font-bold text-moss">
         {fixes.length} {fixes.length === 1 ? "fix was" : "fixes were"} tried in this trial
       </h2>
@@ -405,20 +441,81 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
   const ownSite = record.config.kind === "verified";
   const canTry = !ownSite && chosen.length > 0;
 
+  /** The next move: try the fixes, or start over. Shown above and below the results, never over them. */
+  const nextMove = (where: "top" | "bottom") => (
+    <section
+      className="pixel-panel lit"
+      aria-label={where === "top" ? "Next move" : "Next move, again"}
+    >
+      {ownSite ? (
+        <p className="text-mist">
+          On your own site the shoppers only look. The fixes below are code to copy into your site;
+          trying fixes live and re-running works on the demo store.
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-4">
+        {canTry ? (
+          <button
+            type="button"
+            onClick={tryFixes}
+            disabled={starting}
+            className="pixel-button text-lg"
+          >
+            {starting
+              ? "Opening the road…"
+              : `Try ${chosen.length} ${chosen.length === 1 ? "fix" : "fixes"} and run the trial again`}
+          </button>
+        ) : null}
+        <Link href="/lobby" className="pixel-button quiet">
+          Start a new trial
+        </Link>
+        <Link href="/ledger" className="pixel-button quiet">
+          The ledger
+        </Link>
+      </div>
+      {canTry ? (
+        <p className="mt-3 text-sm text-mist">
+          The fixes are tried on the page in your browser only. Nothing on the shop is changed.
+        </p>
+      ) : null}
+      {where === "bottom" ? (
+        <p role="alert" className="mt-2 font-bold text-rose">
+          {error}
+        </p>
+      ) : null}
+    </section>
+  );
+
   return (
     <>
-      <h1 className="font-display text-4xl font-bold text-parchment sm:text-5xl">Trial results</h1>
-      <p className="mt-3 text-lg text-mist">
-        {ownSite ? record.config.origin : "Tallowmere demo store"},{" "}
-        {new Date(record.startedAt).toLocaleString()}
-        {record.config.previousRunId ? ". A re-run with fixes applied." : ""}
-      </p>
-      <p className="mt-2 max-w-2xl text-mist">
-        Every measurement below was taken from the live page by the browser. The characters&apos;
-        lines are their own.
-      </p>
+      <header className="pixel-panel flush relative overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/store/banner.png"
+          alt=""
+          width={1000}
+          height={375}
+          className="pixelated absolute inset-0 h-full w-full object-cover opacity-60"
+        />
+        <div className="relative bg-gradient-to-r from-night via-night/85 to-transparent p-6 sm:p-8">
+          <p className="font-display text-sm uppercase tracking-[0.3em] text-amber">Trial report</p>
+          <h1 className="font-display mt-1 text-4xl font-bold text-parchment sm:text-5xl">
+            Trial results
+          </h1>
+          <p className="mt-3 text-lg text-parchment">
+            {ownSite ? record.config.origin : "Tallowmere demo store"},{" "}
+            {new Date(record.startedAt).toLocaleString()}
+            {record.config.previousRunId ? ". A re-run with fixes applied." : ""}
+          </p>
+          <p className="mt-2 max-w-2xl text-mist">
+            Every measurement below was taken from the live page by the browser. The
+            characters&apos; lines are their own.
+          </p>
+        </div>
+      </header>
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-8 space-y-8">
+        {nextMove("top")}
         <StoreProgress runId={record.config.runId} />
         <AppliedFixes record={record} />
         <RevenueInputsForm inputs={inputs} onChange={setInputs} />
@@ -433,41 +530,7 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
             onToggle={toggle}
           />
         ))}
-      </div>
-
-      <div className="sticky bottom-0 mt-8 flex flex-wrap items-center gap-4 border-t-2 border-slate bg-night/95 py-4">
-        {ownSite ? (
-          <p className="w-full text-sm text-mist">
-            On your own site the shoppers only look. The fixes above are code to copy into your
-            site; trying fixes live and re-running works on the demo store.
-          </p>
-        ) : null}
-        {canTry ? (
-          <button
-            type="button"
-            onClick={tryFixes}
-            disabled={starting}
-            className="font-display rounded border-b-4 border-ember bg-amber px-6 py-3 text-lg font-bold text-indigo disabled:opacity-50"
-          >
-            {starting
-              ? "Opening the road…"
-              : `Try ${chosen.length} ${chosen.length === 1 ? "fix" : "fixes"} and run the trial again`}
-          </button>
-        ) : null}
-        <Link href="/lobby" className="font-bold text-amber underline underline-offset-4">
-          Start a new trial
-        </Link>
-        <Link href="/ledger" className="font-bold text-amber underline underline-offset-4">
-          The ledger
-        </Link>
-        {canTry ? (
-          <p className="w-full text-sm text-mist">
-            The fixes are tried on the page in your browser only. Nothing on the shop is changed.
-          </p>
-        ) : null}
-        <p role="alert" className="w-full font-bold text-rose">
-          {error}
-        </p>
+        {nextMove("bottom")}
       </div>
     </>
   );
