@@ -104,7 +104,7 @@ test("shoppers observe an owner's own site, never act, and the results come back
   await expect(page.getByText("Picture with no description").first()).toBeVisible();
   // Fixes on an owner's site are code to copy, not something to try here.
   await expect(page.getByRole("button", { name: /run the trial again/ })).toHaveCount(0);
-  await expect(page.getByText("The fixes above are code to copy")).toBeVisible();
+  await expect(page.getByText("The fixes below are code to copy").first()).toBeVisible();
   await site.close();
 });
 

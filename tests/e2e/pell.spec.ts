@@ -59,7 +59,10 @@ test("Pell leaves a page that is too heavy, then buys once the banner is fixed",
   // The fix switches on the store's own lighter banner for the re-run.
   await page.getByRole("link", { name: "See the full results" }).click();
   await expect(page.getByText("a change to the demo store's own code").first()).toBeVisible();
-  await page.getByRole("button", { name: /Try \d+ fix(es)? and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try \d+ fix(es)? and run the trial again/ })
+    .first()
+    .click();
   await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await expect(page.locator("img[src='/store/banner.png']")).toBeVisible();
   await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });

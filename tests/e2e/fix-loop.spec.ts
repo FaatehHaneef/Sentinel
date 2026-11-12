@@ -28,7 +28,10 @@ test("trying the suggested fixes lets Iris complete the purchase", async ({ page
   await expect(page.locator("pre", { hasText: "color:" }).first()).toBeVisible();
 
   // Second walk, with the fixes applied to the live page.
-  await page.getByRole("button", { name: /Try \d+ fixes and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try \d+ fixes and run the trial again/ })
+    .first()
+    .click();
   await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });
 
