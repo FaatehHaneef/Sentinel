@@ -84,6 +84,6 @@ test("a trial cannot start without a launch token from the server", async ({ pag
   expect(await page.locator("sentinel-hud").count()).toBe(0);
 
   // Characters that are not built yet cannot be sent.
-  const notReady = await request.post("/api/runs", { data: { party: ["cog"] } });
+  const notReady = await request.post("/api/runs", { data: { party: ["dash"] } });
   expect(notReady.status()).toBe(400);
 });
