@@ -57,7 +57,7 @@ SCENES = {
         "clip": "scene-04",
         "segments": [
             {"out": [0, "P:Here, Iris"], "src": [0, "M:pale-0.4"]},
-            {"out": ["P:Here, Iris", "end"], "src": ["M:pale-0.4", "M:iris-gone"]},
+            {"out": ["P:Here, Iris", "end"], "src": ["M:pale-0.4", "M:iris-gone-1.6"]},
         ],
         "effects": [
             {
@@ -90,16 +90,21 @@ SCENES = {
     },
     "scene-06": {
         "clip": "scene-06",
+        # Each zoom holds the frame its box was measured on: the page shifts as it loads.
+        "segments": [
+            {"out": [0, "P:what it's costing-0.3"], "src": [0, "P:what it's costing-0.3"]},
+            {"out": ["P:what it's costing-0.3", "P:And every shopper"], "src": ["M:money", "M:money"]},
+            {"out": ["P:And every shopper", "end"], "src": ["M:verdict+0.1", "M:verdict+0.1"]},
+        ],
         "effects": [
             {
                 "kind": "focus",
                 "mark": "money",
                 "from": "P:what it's costing-0.3",
-                "to": "P:And Gemini",
-                "label": "About ${v} a month at risk",
-                "value": "mark",
+                "to": "P:And every shopper",
+                "label": "An estimate, with its assumptions shown",
             },
-            {"kind": "focus", "mark": "verdict", "from": "P:And Gemini+0.3", "to": "end", "label": "Written by Gemini, from the measurements"},
+            {"kind": "focus", "mark": "verdict", "from": "P:And every shopper+0.3", "to": "end", "label": "A verdict for each shopper", "trim": 46},
         ],
     },
     "scene-07": {
@@ -108,7 +113,7 @@ SCENES = {
             {"out": [0, "P:send the shoppers back"], "src": [0, "P:send the shoppers back"]},
             {"out": ["P:send the shoppers back", "P:Iris goes from"], "src": ["M:rerun-0.3", "M:fixed-0.3"]},
             {"out": ["P:Iris goes from", "P:actually pays-0.4"], "src": ["M:fixed-0.3", "M:paid-0.6"]},
-            {"out": ["P:actually pays-0.4", "end"], "src": ["M:paid-0.6", "end"]},
+            {"out": ["P:actually pays-0.4", "end"], "src": ["M:paid-0.6", "M:paid+1.2"]},
         ],
         "effects": [
             {"kind": "focus", "mark": "fix", "from": 0.4, "to": "P:send the shoppers back-0.3", "label": "The fix, as code"},
@@ -406,6 +411,8 @@ def render(scene, t, prepared):
             raw = samples[max(0, i)]["box"] if samples else None
         elif clip and effect.get("mark") in clip["marks"]:
             raw = clip["marks"][effect["mark"]].get("box")
+        if raw and effect.get("trim"):  # cut a strip off the bottom of the box
+            raw = {**raw, "h": raw["h"] - effect["trim"]}
         box = scale_box(raw, clip["viewport"]["width"]) if raw else None
         if kind == "focus":
             frame = apply_focus(frame, effect, t, box, start, end)
@@ -420,11 +427,24 @@ def render(scene, t, prepared):
     return subtitle(frame, scene, t)
 
 
+MUSIC = BUILD / "music.wav"  # from video/music.py; left out if missing
+MUSIC_LEVEL = 0.11  # quiet, well under the voice
+
+
+def music_args():
+    """Mixes the background music under the voice, when there is some."""
+    if not MUSIC.exists():
+        return ["-map", "0:v", "-map", "1:a"]
+    return ["-i", str(MUSIC), "-filter_complex",
+            f"[2:a]volume={MUSIC_LEVEL}[m];[1:a][m]amix=inputs=2:duration=first:normalize=0[a]",
+            "-map", "0:v", "-map", "[a]"]
+
+
 def encode(scenes, target, audio):
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     process = subprocess.Popen(
         [ffmpeg, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
-         "-i", str(audio), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+         "-i", str(audio), *music_args(), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(target)],
         stdin=subprocess.PIPE,
     )
