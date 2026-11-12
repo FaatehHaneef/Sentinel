@@ -23,5 +23,6 @@ export const iris: EngineCharacter = {
   greeting: "Let's see if I can buy a candle, dear.",
   onPurchase: "There we are. That was pleasant.",
   onAbandon: "I'm sorry, dear. I can't make this out. I'll shop somewhere else.",
+  onFixed: "Oh, that's much better, dear. I can see that now.",
   shopper: { name: "Iris Hart", email: "iris@example.com" },
 };

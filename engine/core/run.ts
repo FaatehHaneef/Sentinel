@@ -18,18 +18,21 @@ import { SPRITE_SCALE } from "../hud/stage";
 import type { Actor, Journey, Scene } from "../journeys/types";
 import { Clock, StopSignal } from "./clock";
 import { documentTop, setInputValue, settle } from "./dom";
+import { FixApplier } from "./fixes";
 import {
   clearState,
   saveRecord,
   saveState,
   type CharacterProgress,
   type EngineState,
+  type PreviousSnag,
 } from "./state";
 
 const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = { iris };
 
 /** How long the character lingers on a snag, in trial time. */
 const SNAG_PAUSE_MS = 1500;
+const FIXED_PAUSE_MS = 1100;
 const PASS_PAUSE_MS = 450;
 const TYPING_MS = 55;
 
@@ -40,6 +43,19 @@ type EventInput = TrialEvent extends infer E
     : never
   : never;
 
+/** Something for the character to walk to on a page: a snag, or a snag from last time that is gone. */
+type Stop =
+  | { kind: "snag"; element: Element; located: Located }
+  | { kind: "fixed"; element: Element; previous: PreviousSnag };
+
+function find(selector: string): Element | null {
+  try {
+    return document.querySelector(selector);
+  } catch {
+    return null;
+  }
+}
+
 export async function runTrial(
   state: EngineState,
   journey: Journey,
@@ -49,6 +65,34 @@ export async function runTrial(
   const sfx = new Sfx();
   const hud = new Hud(clock, sfx, () => clock.stop());
 
+  // On a re-run, the chosen fixes go onto the page before anything is measured.
+  const applier = new FixApplier(state.fixes);
+  applier.start();
+  if (applier.count > 0 && state.events.length === 0) {
+    hud.feed({
+      kind: "info",
+      text: `Trying ${applier.count} ${applier.count === 1 ? "fix" : "fixes"} from the last trial`,
+    });
+  }
+
+  const finishRun = (title: string): void => {
+    state.finished = true;
+    saveRecord(state, true, applier.applied);
+    clearState();
+    applier.stop();
+    const snags = state.events.filter((event) => event.type === "snag").length;
+    const fixed = state.events.filter((event) => event.type === "fixed").length;
+    const purchases = state.events.filter((event) => event.type === "purchase").length;
+    const shoppers = state.config.party.length;
+    hud.showSummary(
+      title,
+      `${purchases} of ${shoppers} ${shoppers === 1 ? "shopper" : "shoppers"} completed a purchase. ` +
+        `${snags} ${snags === 1 ? "snag" : "snags"} found` +
+        (fixed > 0 ? `, ${fixed} fixed since last time.` : "."),
+      { href: `${apiBase}/runs/${state.config.runId}`, label: "See the full results" },
+    );
+  };
+
   try {
     while (state.index < state.config.party.length) {
       const id = state.config.party[state.index];
@@ -57,11 +101,11 @@ export async function runTrial(
         state.index += 1;
         continue;
       }
-      await walk(state, character, journey, hud, sfx, clock);
+      await walk(state, character, journey, hud, sfx, clock, applier);
       state.index += 1;
       state.progress = null;
       saveState(state);
-      saveRecord(state, false);
+      saveRecord(state, false, applier.applied);
       if (state.index < state.config.party.length) {
         // The next shopper starts from the beginning with an empty cart.
         journey.prepare();
@@ -69,7 +113,7 @@ export async function runTrial(
         return;
       }
     }
-    finishRun(state, hud, apiBase, "Trial complete");
+    finishRun("Trial complete");
   } catch (error) {
     if (!(error instanceof StopSignal)) throw error;
     const id = state.config.party[state.index];
@@ -85,23 +129,8 @@ export async function runTrial(
         xp: progress.xp,
       });
     }
-    finishRun(state, hud, apiBase, "Trial ended early");
+    finishRun("Trial ended early");
   }
-}
-
-function finishRun(state: EngineState, hud: Hud, apiBase: string, title: string): void {
-  state.finished = true;
-  saveRecord(state, true);
-  clearState();
-  const snags = state.events.filter((event) => event.type === "snag").length;
-  const purchases = state.events.filter((event) => event.type === "purchase").length;
-  const shoppers = state.config.party.length;
-  hud.showSummary(
-    title,
-    `${purchases} of ${shoppers} ${shoppers === 1 ? "shopper" : "shoppers"} completed a purchase. ` +
-      `${snags} ${snags === 1 ? "snag" : "snags"} found.`,
-    { href: `${apiBase}/runs/${state.config.runId}`, label: "See the full results" },
-  );
 }
 
 async function walk(
@@ -111,6 +140,7 @@ async function walk(
   hud: Hud,
   sfx: Sfx,
   clock: Clock,
+  applier: FixApplier,
 ): Promise<void> {
   const meta = getCharacter(character.id);
   const stage = hud.stage;
@@ -152,6 +182,7 @@ async function walk(
     const y = Math.max(24 * SPRITE_SCALE + 8, Math.min(rect.bottom + 6, window.innerHeight - 12));
     return { x, y };
   };
+  stage.setSpotResolver(spotFor);
 
   const goTo = async (element: Element): Promise<void> => {
     await clock.whenRunning();
@@ -161,6 +192,8 @@ async function walk(
     await stage.walkTo(spot.x, spot.y);
     await clock.whenRunning();
   };
+
+  let currentScene = "start";
 
   const actor: Actor = {
     shopper: character.shopper,
@@ -189,7 +222,6 @@ async function walk(
     },
   };
 
-  let currentScene = "start";
   refresh();
   stage.enterFromLeft(Math.min(window.innerHeight - 40, 260));
   if (!progress.greeted) {
@@ -199,63 +231,127 @@ async function walk(
     await clock.sleep(900);
   }
 
+  const reportSnag = async (scene: Scene, located: Located, title: string): Promise<void> => {
+    const { element, ...finding } = located;
+    if (element.isConnected) {
+      await goTo(element);
+      hud.highlight(element, true);
+    }
+    stage.setAnimation(character.reactions[finding.check] ?? "squint");
+
+    const coins = coinCost(progress.purse, progress.coins, finding, scene.funnel);
+    const patience = patienceCost(finding);
+    progress.coins -= coins;
+    progress.patience = Math.max(0, progress.patience - patience);
+    const line = character.lines[finding.check] ?? "";
+
+    emit({
+      type: "snag",
+      scene: scene.id,
+      funnel: scene.funnel,
+      finding: finding satisfies Finding,
+      title,
+      line,
+      coins,
+      patience,
+    });
+    hud.say(line);
+    hud.feed({
+      kind: "snag",
+      text: finding.label,
+      detail: finding.measured,
+      delta: `−${coins} coins`,
+      selector: finding.selector,
+    });
+    stage.spillCoins(coins);
+    sfx.play("snag");
+    refresh();
+    await clock.sleep(SNAG_PAUSE_MS);
+    stage.setAnimation("idle");
+    stage.releaseGhost(element);
+  };
+
+  const reportFixed = async (
+    scene: Scene,
+    element: Element,
+    previous: PreviousSnag,
+    title: string,
+  ): Promise<void> => {
+    await goTo(element);
+    hud.highlight(element);
+    stage.setAnimation("happy");
+    const xp = passXp(previous.severity);
+    progress.xp += xp;
+    emit({
+      type: "fixed",
+      scene: scene.id,
+      check: previous.check,
+      selector: previous.selector,
+      label: previous.label,
+      coinsSaved: previous.coins,
+      xp,
+    });
+    hud.say(character.onFixed);
+    hud.feed({
+      kind: "good",
+      text: `Fixed: ${previous.label}`,
+      detail: title,
+      delta: `+${xp} XP`,
+      selector: previous.selector,
+    });
+    stage.sparkle();
+    stage.releaseGhost(element);
+    sfx.play("pass");
+    refresh();
+    await clock.sleep(FIXED_PAUSE_MS);
+    stage.setAnimation("idle");
+  };
+
   const inspect = async (scene: Scene): Promise<void> => {
     await settle(200, 1500);
+    applier.addLabels();
     const results = character.checks({ pathElements: scene.path() });
+    const titleOf = (check: string): string =>
+      results.find((result) => result.check === check)?.title ?? check;
 
-    // Furniture that repeats on every page (header, footer) is reported the first time only.
-    const fresh: Located[] = [];
+    const stops: Stop[] = [];
+    const failing = new Set<string>();
     const cleanChecks: typeof results = [];
     for (const result of results) {
       if (result.findings.length === 0) cleanChecks.push(result);
-      for (const finding of result.findings) {
-        const key = `${finding.check}|${finding.selector}`;
+      for (const located of result.findings) {
+        const key = `${located.check}|${located.selector}`;
+        failing.add(key);
+        // Furniture that repeats on every page (header, footer) is reported the first time only.
         if (progress.seen.includes(key)) continue;
         progress.seen.push(key);
-        fresh.push(finding);
+        stops.push({ kind: "snag", element: located.element, located });
       }
     }
-    fresh.sort((a, b) => documentTop(a.element) - documentTop(b.element));
 
-    for (const located of fresh) {
-      const { element, ...finding } = located;
-      const result = results.find((entry) => entry.check === finding.check);
-      if (element.isConnected) {
-        await goTo(element);
-        hud.highlight(element, true);
+    // What the last trial found here: a ghost stands at each place, and
+    // anything no longer failing counts as fixed.
+    const before = state.previous.filter(
+      (snag) => snag.character === character.id && snag.scene === scene.id,
+    );
+    const ghosts = new Set<Element>();
+    for (const previous of before) {
+      const element = find(previous.selector);
+      if (!element) continue;
+      ghosts.add(element);
+      if (!failing.has(`${previous.check}|${previous.selector}`)) {
+        stops.push({ kind: "fixed", element, previous });
       }
-      stage.setAnimation(character.reactions[finding.check] ?? "squint");
+    }
+    stage.setGhosts([...ghosts]);
 
-      const coins = coinCost(progress.purse, progress.coins, finding, scene.funnel);
-      const patience = patienceCost(finding);
-      progress.coins -= coins;
-      progress.patience = Math.max(0, progress.patience - patience);
-      const line = character.lines[finding.check] ?? "";
-
-      emit({
-        type: "snag",
-        scene: scene.id,
-        finding: finding satisfies Finding,
-        title: result?.title ?? finding.check,
-        line,
-        coins,
-        patience,
-      });
-      hud.say(line);
-      hud.feed({
-        kind: "snag",
-        text: finding.label,
-        detail: finding.measured,
-        delta: `−${coins} coins`,
-        selector: finding.selector,
-      });
-      stage.spillCoins(coins);
-      sfx.play("snag");
-      refresh();
-      await clock.sleep(SNAG_PAUSE_MS);
-      stage.setAnimation("idle");
+    stops.sort((a, b) => documentTop(a.element) - documentTop(b.element));
+    for (const stop of stops) {
+      if (stop.kind === "snag") await reportSnag(scene, stop.located, titleOf(stop.located.check));
+      else await reportFixed(scene, stop.element, stop.previous, titleOf(stop.previous.check));
     }
     hud.highlight(null);
+    stage.setGhosts([]);
 
     for (const result of cleanChecks) {
       const xp = passXp(result.weight);
