@@ -13,7 +13,7 @@ export type EngineCharacter = {
   palette: Record<string, string>;
   /** How the page looks to this character, for the button that shows it. Omitted when sight is not the issue. */
   lens?: Lens;
-  checks(context: CheckContext): CheckResult[];
+  checks(context: CheckContext): CheckResult[] | Promise<CheckResult[]>;
   /** What the character says about a snag, by check id. Used until AI lines are available. */
   lines: Record<string, string>;
   /** Which reaction to play for a snag, by check id. */

@@ -5,6 +5,8 @@ export type Located = Finding & {
   element: Element;
   /** What the character says about this finding, when it depends on the element. */
   line?: string;
+  /** Why the shopper leaves, when this finding stops them. Defaults to "could not use the …". */
+  stopReason?: string;
   /** Where simulated taps landed, in viewport coordinates, for showing on the page. */
   taps?: { x: number; y: number; hit: boolean }[];
 };

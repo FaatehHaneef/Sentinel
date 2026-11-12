@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { getCharacter } from "@/lib/cast";
+import { writeStoreFixes } from "@/lib/store/variants";
 import { fixToCss, fixToSnippet } from "@/lib/trial/fixes";
 import { DEFAULT_REVENUE_INPUTS, type RevenueInputs } from "@/lib/trial/revenue";
 import { COINS_PER_DOLLAR, summarize, type CharacterSummary } from "@/lib/trial/scoring";
@@ -215,9 +216,11 @@ function CharacterResult({
                         <span>
                           Fix: {fix.summary}
                           <span className="ml-2 font-normal text-mist">
-                            {fix.source === "ai"
-                              ? "(colour suggested by AI, checked by the contrast maths)"
-                              : "(computed from the measurement)"}
+                            {fix.storeFix
+                              ? "(a change to the demo store's own code, switched on in your browser for the re-run)"
+                              : fix.source === "ai"
+                                ? "(colour suggested by AI, checked by the contrast maths)"
+                                : "(computed from the measurement)"}
                           </span>
                         </span>
                       </label>
@@ -365,6 +368,10 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
     try {
       const pending: PendingFixes = { fromRun: record.config.runId, fixes: chosen };
       window.localStorage.setItem(FIXES_STORAGE_KEY, JSON.stringify(pending));
+      writeStoreFixes(
+        window.localStorage,
+        chosen.flatMap(({ fix }) => (fix.storeFix ? [fix.storeFix] : [])),
+      );
       const response = await fetch("/api/runs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
