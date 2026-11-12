@@ -63,7 +63,11 @@ test("Cog cannot buy without product data, then its agent orders once the data i
   const actions = second.events
     .filter((event) => event.type === "action")
     .map((event) => event.text);
-  expect(actions).toContain("Reads the data: Dusk Ember, 18.00 USD");
+  // The agent is asked exactly once.
+  expect(actions.filter((text) => text === "Reads the data: Dusk Ember, 18.00 USD")).toHaveLength(
+    1,
+  );
+  expect(actions.some((text) => /could not be reached/.test(text))).toBe(false);
   // Tests run with AI switched off, so the agent's rules decide.
   expect(
     actions.some((text) =>

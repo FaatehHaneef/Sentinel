@@ -471,7 +471,13 @@ async function walk(
     }
 
     const handled = (await character.takeOver?.(scene, actor)) ?? false;
-    if (!handled) await scene.advance(actor);
+    if (handled) {
+      // The character moved on in its own way, often by leaving the page. Wait
+      // for the scene to change, so nothing here is done twice.
+      await clock.waitFor(() => !scene.match(), 20_000);
+    } else {
+      await scene.advance(actor);
+    }
     await settle();
   }
 }
