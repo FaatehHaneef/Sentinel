@@ -176,9 +176,38 @@
         font-size: 22px;
         color: #a0522d;
       }
+
+      /* ?wide: the 16:9 version, for the YouTube thumbnail. */
+      body.wide {
+        width: 1600px;
+        height: 900px;
+      }
+      body.wide #crowd {
+        width: 1305px;
+        height: 870px;
+        left: 148px;
+        top: 96px;
+      }
+      body.wide .title {
+        top: 26px;
+      }
+      body.wide .title h1 {
+        font-size: 118px;
+      }
+      body.wide .title p {
+        margin-top: 10px;
+        font-size: 26px;
+      }
+      body.wide .note {
+        right: 60px;
+        bottom: 56px;
+      }
     </style>
   </head>
   <body>
+    <script>
+      if (location.search.includes("wide")) document.body.classList.add("wide");
+    </script>
     <div class="scene">
       <img class="backdrop" src="../assets/banner.png" alt="" />
       <div class="glow"></div>
