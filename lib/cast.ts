@@ -76,12 +76,10 @@ export const CAST: readonly Character[] = [
     checks: [
       "Everything reachable by keyboard",
       "Visible focus",
-      "Sensible focus order",
+      "No tricks with the tab order",
       "A way to skip long menus",
-      "Controls that answer to Enter and Space",
-      "Dialogs that hold focus",
     ],
-    ready: false,
+    ready: true,
     accent: "parchment",
   },
   {
@@ -90,14 +88,13 @@ export const CAST: readonly Character[] = [
     represents: "A shopper who uses a screen reader",
     motto: "Tell me what it is, and I'll find my way.",
     checks: [
-      "Image descriptions",
+      "Picture descriptions",
       "Names for buttons, links and fields",
       "Heading structure",
       "Page landmarks",
       "Page language and title",
-      "Errors that get announced",
     ],
-    ready: false,
+    ready: true,
     accent: "rose",
   },
   {

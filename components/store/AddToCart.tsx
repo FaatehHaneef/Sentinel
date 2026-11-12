@@ -15,6 +15,8 @@ export function AddToCart({ productId, productName }: { productId: string; produ
           addToCart(productId);
           setAdded(true);
         }}
+        // Deliberate snag for the trials: no outline when the keyboard is on this button.
+        style={{ outline: "none" }}
         className="rounded bg-wax px-6 py-3 text-lg font-bold text-card hover:bg-ink"
       >
         Add to cart

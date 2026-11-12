@@ -14,9 +14,13 @@ export const HUD_STYLES = `
 * { box-sizing: border-box; }
 .lens {
   position: absolute; inset: 0; display: none;
+}
+.lens.blur {
   backdrop-filter: blur(1.6px) contrast(0.78) saturate(0.85);
   -webkit-backdrop-filter: blur(1.6px) contrast(0.78) saturate(0.85);
 }
+.lens.dark { background: rgba(8, 9, 20, 0.96); }
+button[hidden] { display: none; }
 .lens.on { display: block; }
 .stage { position: absolute; inset: 0; width: 100%; height: 100%; }
 .highlight {

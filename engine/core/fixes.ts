@@ -13,6 +13,7 @@ import { HUD_TAG } from "./dom";
 
 const STYLE_ATTRIBUTE = "data-sentinel-fixes";
 const LABEL_ATTRIBUTE = "data-sentinel-label";
+const KEYS_ATTRIBUTE = "data-sentinel-keys";
 
 export class FixApplier {
   private readonly fixes: AppliedFix[];
@@ -48,27 +49,43 @@ export class FixApplier {
       document.head.append(style);
     }
 
-    this.addLabels();
+    this.apply();
     // Pages change as the shopper moves through them, so labels are added again when fields appear.
     this.observer = new MutationObserver((mutations) => {
       if (mutations.every((mutation) => (mutation.target as Element).closest?.(HUD_TAG))) return;
       window.clearTimeout(this.pending);
-      this.pending = window.setTimeout(() => this.addLabels(), 50);
+      this.pending = window.setTimeout(() => this.apply(), 50);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  /** Adds any missing labels now, without waiting for the observer. */
-  addLabels(): void {
+  /** Applies everything that is not a style rule now, without waiting for the observer. */
+  apply(): void {
     for (const { selector, fix } of this.fixes) {
-      if (!fix.label) continue;
       let field: Element | null = null;
       try {
         field = document.querySelector(selector);
       } catch {
         continue;
       }
-      if (!field || field.previousElementSibling?.hasAttribute(LABEL_ATTRIBUTE)) continue;
+      if (!field) continue;
+
+      for (const [name, value] of Object.entries(fix.attributes ?? {})) {
+        if (field.getAttribute(name) !== value) field.setAttribute(name, value);
+      }
+
+      if (fix.keyboard && !field.hasAttribute(KEYS_ATTRIBUTE)) {
+        // Enter and Space press it, as they would a real button.
+        const control = field as HTMLElement;
+        control.setAttribute(KEYS_ATTRIBUTE, "");
+        control.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          control.click();
+        });
+      }
+
+      if (!fix.label || field.previousElementSibling?.hasAttribute(LABEL_ATTRIBUTE)) continue;
 
       const label = document.createElement("label");
       label.setAttribute(LABEL_ATTRIBUTE, "");

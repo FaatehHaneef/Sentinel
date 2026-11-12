@@ -109,6 +109,24 @@ const WHY: Record<string, string> = {
     "Most attempts to press this miss, and every miss is a moment where the shopper may give up. A larger control fixes it.",
   "tobin.precision":
     "A slider has to be held steady and dragged, which a trembling hand cannot do. Offer buttons or a number box as well.",
+  "knock.reachable":
+    "This looks like a button but is not one, so the Tab key never lands on it and it cannot be pressed without a mouse. Make it a real button.",
+  "knock.focus-visible":
+    "Nothing shows when the keyboard is on this, so the shopper cannot tell where they are on the page. Show a clear outline on focus.",
+  "knock.tab-order":
+    "This forces itself to the front of the tab order, so focus jumps around the page. Let it follow the order it appears in.",
+  "knock.skip-link":
+    "Without a skip link, a keyboard user has to tab through the whole menu on every page. Add a link that jumps to the main content.",
+  "echo.image-names":
+    "A screen reader can only say that there is a picture here, not what it shows. Add a short description.",
+  "echo.control-names":
+    "A screen reader announces this without saying what it does, so the shopper has to guess. Give it a name that says where it goes or what it does.",
+  "echo.headings":
+    "Screen reader users move around a page by its headings. Gaps in the heading levels make that map hard to follow.",
+  "echo.landmarks":
+    "Without a marked main area, a screen reader user has to listen through everything to find the content.",
+  "echo.page-basics":
+    "The page does not say what language it is in or what it is called, so it may be read in the wrong voice or announced as nothing.",
   "iris.button":
     "A button that barely differs from the page is easy to miss altogether. Give it a visible edge or a stronger colour.",
 };

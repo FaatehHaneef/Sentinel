@@ -21,13 +21,15 @@ export type Evidence = {
 
 /** One style change: which part of the element, and the declarations to set. */
 export type CssChange = {
-  target: "element" | "placeholder";
+  /** element: the element itself. placeholder: its placeholder text. focus: the element while it has keyboard focus. */
+  target: "element" | "placeholder" | "focus";
   declarations: Record<string, string>;
 };
 
 /**
- * A suggested repair for one finding. It can only restyle the element or add
- * a visible label above a field: nothing else is expressible.
+ * A suggested repair for one finding. It can restyle the element, add a
+ * visible label above a field, set a few named attributes, or make the
+ * element work from the keyboard. Nothing else is expressible.
  */
 export type Fix = {
   /** What the fix does, in plain words. */
@@ -35,6 +37,10 @@ export type Fix = {
   css?: CssChange[];
   /** Text of a visible label to add above a field. */
   label?: string;
+  /** Attributes to set, from a short allowed list (a name, a role, a place in the tab order). */
+  attributes?: Record<string, string>;
+  /** Make the element respond to Enter and Space as a button does. */
+  keyboard?: boolean;
   /** rule: computed from the measurement. ai: a colour suggested by AI and checked by the same maths. */
   source: "rule" | "ai";
 };
@@ -52,6 +58,8 @@ export type Finding = {
   measured: string;
   /** True when the shopper has to use this element to complete the purchase. */
   onPath: boolean;
+  /** True when this shopper cannot use the element at all, however patient they are. */
+  stops?: boolean;
   evidence?: Evidence;
   fix?: Fix;
 };
