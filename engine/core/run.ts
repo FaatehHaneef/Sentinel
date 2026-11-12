@@ -11,6 +11,7 @@ import {
 import type { Finding, Outcome, TrialEvent } from "@/lib/trial/types";
 import { buildSprite } from "../art/sprite";
 import { Sfx } from "../audio/sfx";
+import { cog } from "../cast/cog";
 import { iris } from "../cast/iris";
 import { knock } from "../cast/knock";
 import { pell } from "../cast/pell";
@@ -39,6 +40,7 @@ const CHARACTERS: Partial<Record<CharacterId, EngineCharacter>> = {
   pell,
   knock,
   echo,
+  cog,
 };
 
 /** How long the character lingers on a snag, in trial time. */
@@ -114,7 +116,7 @@ export async function runTrial(
         state.index += 1;
         continue;
       }
-      await walk(state, character, journey, hud, sfx, clock, applier);
+      await walk(state, character, journey, hud, sfx, clock, applier, apiBase);
       state.index += 1;
       state.progress = null;
       saveState(state);
@@ -154,6 +156,7 @@ async function walk(
   sfx: Sfx,
   clock: Clock,
   applier: FixApplier,
+  apiBase: string,
 ): Promise<void> {
   const meta = getCharacter(character.id);
   const stage = hud.stage;
@@ -212,7 +215,16 @@ async function walk(
 
   const actor: Actor = {
     shopper: character.shopper,
+    apiBase,
     goTo,
+    say(line) {
+      hud.say(line);
+    },
+    note(text, kind = "info") {
+      hud.feed({ kind, text });
+      emit({ type: "action", scene: currentScene, text });
+    },
+    pause: (ms) => clock.sleep(ms),
     waitFor: (probe, timeoutMs) => clock.waitFor(probe, timeoutMs),
     async click(element, description) {
       await goTo(element);
@@ -458,7 +470,8 @@ async function walk(
       return;
     }
 
-    await scene.advance(actor);
+    const handled = (await character.takeOver?.(scene, actor)) ?? false;
+    if (!handled) await scene.advance(actor);
     await settle();
   }
 }

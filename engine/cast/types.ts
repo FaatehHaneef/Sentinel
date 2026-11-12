@@ -1,7 +1,7 @@
 import type { CharacterId } from "@/lib/cast";
 import type { CheckContext, CheckResult } from "../checks/types";
 import type { Animation } from "../hud/stage";
-import type { Shopper } from "../journeys/types";
+import type { Actor, Scene, Shopper } from "../journeys/types";
 
 /** blur: soft and washed out, as with low vision. dark: the screen off, as for a screen reader user. */
 export type Lens = { label: string; kind: "blur" | "dark" };
@@ -25,4 +25,9 @@ export type EngineCharacter = {
   onFixed: string;
   /** Details the character types at checkout. */
   shopper: Shopper;
+  /**
+   * Lets a character move on from a scene in its own way instead of the
+   * journey's. Returns true if it did; false leaves it to the journey.
+   */
+  takeOver?(scene: Scene, actor: Actor): Promise<boolean>;
 };

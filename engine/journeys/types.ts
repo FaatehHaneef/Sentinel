@@ -8,7 +8,15 @@ export type Actor = {
   click(element: HTMLElement, description: string): Promise<void>;
   type(field: HTMLInputElement, value: string, description: string): Promise<void>;
   waitFor<T>(probe: () => T | null | undefined | false, timeoutMs: number): Promise<T | null>;
+  /** Says something in the character's voice. */
+  say(line: string): void;
+  /** Adds a line to the feed and the trial record. */
+  note(text: string, kind?: "info" | "good" | "bad"): void;
+  /** Waits for a length of trial time. */
+  pause(ms: number): Promise<void>;
   shopper: Shopper;
+  /** Address of the Sentinel app the trial was launched from. */
+  apiBase: string;
 };
 
 /** One stretch of the road to a purchase. */
