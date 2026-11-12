@@ -6,7 +6,13 @@ import { useState } from "react";
 import { getCharacter } from "@/lib/cast";
 import { writeStoreFixes } from "@/lib/store/variants";
 import { fixToCss, fixToSnippet } from "@/lib/trial/fixes";
-import { DEFAULT_REVENUE_INPUTS, type RevenueInputs } from "@/lib/trial/revenue";
+import { plainProblem, PLAIN_SEVERITY } from "@/lib/trial/plain";
+import {
+  abandonmentChance,
+  DEFAULT_REVENUE_INPUTS,
+  revenueAtRisk,
+  type RevenueInputs,
+} from "@/lib/trial/revenue";
 import { COINS_PER_DOLLAR, summarize, type CharacterSummary } from "@/lib/trial/scoring";
 import {
   FIXES_STORAGE_KEY,
@@ -110,18 +116,145 @@ function Comparison({ before, after }: { before: CharacterSummary; after: Charac
   );
 }
 
+type Tab = "summary" | "problems" | "money" | "progress";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "summary", label: "Summary" },
+  { id: "problems", label: "Problems and fixes" },
+  { id: "money", label: "Money at risk" },
+  { id: "progress", label: "Progress" },
+];
+
+function readTab(): Tab {
+  if (typeof window === "undefined") return "summary";
+  const hash = window.location.hash.slice(1);
+  return TABS.some((entry) => entry.id === hash) ? (hash as Tab) : "summary";
+}
+
+function money(value: number): string {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+/** The game-style tabs that lead from the summary to each kind of detail. */
+function TabBar({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) => void }) {
+  return (
+    <div role="tablist" aria-label="Trial results" className="mt-8 flex flex-wrap gap-3">
+      {TABS.map((entry) => (
+        <button
+          key={entry.id}
+          id={`tab-${entry.id}`}
+          type="button"
+          role="tab"
+          aria-selected={tab === entry.id}
+          aria-controls={`panel-${entry.id}`}
+          onClick={() => onChange(entry.id)}
+          className={`pixel-button ${tab === entry.id ? "" : "quiet"}`}
+        >
+          {entry.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** One shopper on the summary screen: who, how it went, and the worst problems in plain words. */
+function ShopperSummary({
+  summary,
+  verdict,
+  onDetails,
+}: {
+  summary: CharacterSummary;
+  verdict: VerdictState;
+  onDetails: () => void;
+}) {
+  const character = getCharacter(summary.character);
+  const purse = summary.coinsLeft + summary.coinsLost;
+  const good = summary.outcome === "purchased";
+  const order: Record<Severity, number> = { blocker: 0, major: 1, minor: 2 };
+  const worst = [...summary.snags]
+    .sort((a, b) => order[a.finding.severity] - order[b.finding.severity])
+    .slice(0, 3);
+  const tone = good ? "text-moss" : summary.outcome === "observed" ? "text-mist" : "text-rose";
+
+  return (
+    <section className="pixel-panel flex flex-col gap-4">
+      <div className="flex items-center gap-4">
+        <div className="flex h-28 w-20 flex-none items-end justify-center border-2 border-slate bg-night">
+          <Sprite
+            id={summary.character}
+            scale={4}
+            mood={good ? "happy" : summary.outcome === "abandoned" ? "worry" : "idle"}
+          />
+        </div>
+        <div className="min-w-0">
+          <h2 className="font-display text-2xl font-bold text-amber">{character.name}</h2>
+          <p className={`stamp mt-2 text-base ${tone}`}>{OUTCOME_TEXT[summary.outcome]}</p>
+        </div>
+      </div>
+      <p className="font-bold text-parchment">{verdict.verdict.headline}</p>
+      {purse > 0 ? (
+        <div>
+          <div
+            className="flex h-4 w-full overflow-hidden border-2 border-night bg-night"
+            role="img"
+            aria-label={`${summary.coinsLeft} of ${purse} coins kept, ${summary.coinsLost} lost`}
+          >
+            <span
+              className="h-full bg-amber"
+              style={{ width: `${(summary.coinsLeft / purse) * 100}%` }}
+            />
+            <span
+              className="h-full bg-rose"
+              style={{ width: `${(summary.coinsLost / purse) * 100}%` }}
+            />
+          </div>
+          <p className="mt-1 text-sm text-mist">
+            {summary.coinsLeft} coins kept, {summary.coinsLost} lost
+          </p>
+        </div>
+      ) : null}
+      {worst.length > 0 ? (
+        <ul className="space-y-2">
+          {worst.map((snag, index) => (
+            <li key={index} className="border-l-4 border-rose bg-night px-3 py-2">
+              <p className="font-bold text-parchment">{plainProblem(snag.finding.check)}</p>
+              <p className="text-sm text-mist">
+                {snag.finding.label} · {PLAIN_SEVERITY[snag.finding.severity]}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-moss">Nothing got in the way.</p>
+      )}
+      {summary.snags.length > worst.length ? (
+        <p className="text-sm text-mist">and {summary.snags.length - worst.length} more</p>
+      ) : null}
+      <button
+        type="button"
+        onClick={onDetails}
+        className="pixel-button quiet mt-auto self-start text-sm"
+      >
+        Problems and fixes
+      </button>
+    </section>
+  );
+}
+
 function CharacterResult({
   summary,
   before,
   verdict,
-  inputs,
   excluded,
   onToggle,
 }: {
   summary: CharacterSummary;
   before?: CharacterSummary;
   verdict: VerdictState;
-  inputs: RevenueInputs;
   excluded: Set<string>;
   onToggle: (key: string) => void;
 }) {
@@ -193,8 +326,6 @@ function CharacterResult({
       </dl>
 
       {before ? <Comparison before={before} after={summary} /> : null}
-
-      <RevenueEstimate name={character.name} summary={summary} before={before} inputs={inputs} />
 
       {summary.fixed.length > 0 ? (
         <>
@@ -371,6 +502,20 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
     averageOrderValue: purse / COINS_PER_DOLLAR,
   });
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
+  const [tab, setTab] = useState<Tab>(() => readTab());
+  const changeTab = (next: Tab) => {
+    setTab(next);
+    window.history.replaceState(
+      null,
+      "",
+      next === "summary" ? window.location.pathname : `#${next}`,
+    );
+    window.scrollTo({ top: 0 });
+  };
+  const totalAtRisk = summaries.reduce(
+    (sum, summary) => sum + revenueAtRisk(inputs, abandonmentChance(summary.snags)),
+    0,
+  );
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
 
@@ -514,23 +659,81 @@ function Results({ record, previous }: { record: RunRecord; previous: RunRecord 
         </div>
       </header>
 
-      <div className="mt-8 space-y-8">
-        {nextMove("top")}
-        <StoreProgress runId={record.config.runId} />
-        <AppliedFixes record={record} />
-        <RevenueInputsForm inputs={inputs} onChange={setInputs} />
-        {summaries.map((summary) => (
-          <CharacterResult
-            key={summary.character}
-            summary={summary}
-            before={before.find((entry) => entry.character === summary.character)}
-            verdict={verdicts[summary.character]}
-            inputs={inputs}
-            excluded={excluded}
-            onToggle={toggle}
-          />
-        ))}
-        {nextMove("bottom")}
+      <TabBar tab={tab} onChange={changeTab} />
+
+      <div
+        className="mt-6 space-y-8"
+        role="tabpanel"
+        id={`panel-${tab}`}
+        aria-labelledby={`tab-${tab}`}
+      >
+        {tab === "summary" ? (
+          <>
+            {nextMove("top")}
+            <section className="pixel-panel lit">
+              <p className="font-display text-sm uppercase tracking-widest text-amber">
+                Money at risk
+              </p>
+              <p className="mt-1 text-2xl font-bold text-parchment">
+                About {money(totalAtRisk)} a month could be lost to these problems.
+              </p>
+              <button
+                type="button"
+                className="mt-2 text-amber underline underline-offset-4"
+                onClick={() => changeTab("money")}
+              >
+                See how this is worked out
+              </button>
+            </section>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {summaries.map((summary) => (
+                <ShopperSummary
+                  key={summary.character}
+                  summary={summary}
+                  verdict={verdicts[summary.character]}
+                  onDetails={() => changeTab("problems")}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {tab === "problems" ? (
+          <>
+            <AppliedFixes record={record} />
+            {summaries.map((summary) => (
+              <CharacterResult
+                key={summary.character}
+                summary={summary}
+                before={before.find((entry) => entry.character === summary.character)}
+                verdict={verdicts[summary.character]}
+                excluded={excluded}
+                onToggle={toggle}
+              />
+            ))}
+            {nextMove("bottom")}
+          </>
+        ) : null}
+
+        {tab === "money" ? (
+          <>
+            <RevenueInputsForm inputs={inputs} onChange={setInputs} />
+            <div className="grid gap-6 lg:grid-cols-2">
+              {summaries.map((summary) => (
+                <section key={summary.character} className="pixel-panel">
+                  <RevenueEstimate
+                    name={getCharacter(summary.character).name}
+                    summary={summary}
+                    before={before.find((entry) => entry.character === summary.character)}
+                    inputs={inputs}
+                  />
+                </section>
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {tab === "progress" ? <StoreProgress runId={record.config.runId} /> : null}
       </div>
     </>
   );

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function RunPage() {
   return (
-    <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-12">
+    <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-12">
       <Suspense fallback={<p className="text-lg text-mist">Reading the trial record…</p>}>
         <RunResults />
       </Suspense>
