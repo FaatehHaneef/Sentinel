@@ -141,6 +141,14 @@ const WHY: Record<string, string> = {
     "The price in the product data and the price on the page disagree, and a careful agent will not pay a price it cannot confirm. Keep them in step.",
   "cog.real-controls":
     "This is needed to buy but is not a real button or link, so an agent cannot tell that it does anything. Use a real button.",
+  "dash.overflow":
+    "On a phone the page is wider than the screen, so it slides sideways under the shopper's thumb. Let this part wrap to fit.",
+  "dash.viewport":
+    "The page is not set up for phones, or stops the shopper zooming in. Set the viewport to the device width and allow zoom.",
+  "dash.popup":
+    "On a phone this popup covers most of the screen before the shopper has seen a single product, and an impatient shopper simply leaves. Show the offer inside the page instead.",
+  "dash.input-help":
+    "Without the right field type and autofill, a phone shopper types everything by hand on a small keyboard. Tell the phone what each field is for.",
   "iris.button":
     "A button that barely differs from the page is easy to miss altogether. Give it a visible edge or a stronger colour.",
 };
