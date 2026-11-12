@@ -147,6 +147,19 @@ Sentinel is a defensive testing tool, and its limits are enforced in code:
 Open [the store](https://sentinel-ten-ashy.vercel.app/store) and buy a candle. Payments use the
 Braintree sandbox, so use a test card: **4111 1111 1111 1111**, any future expiry date, any CVV.
 
+## Limits
+
+- **Braintree's sandbox, not a PayPal account.** PayPal accounts, including the developer
+  sandbox accounts, aren't available to developers in Pakistan, where Sentinel was built. So
+  every payment runs through Braintree's sandbox (Braintree is a PayPal service) with test cards.
+  The PayPal button in Braintree's payment form is already wired in, and turns on with one
+  setting (`NEXT_PUBLIC_PAYPAL_ENABLED`) once a PayPal sandbox account is linked.
+- **Gemini's free tier.** Verdicts and Cog's agent run on Gemini's free tier, which has a daily
+  limit. When it's used up, or Google is busy, Sentinel uses its built-in notes and says so on
+  screen, and Cog falls back to the ordinary checkout.
+- **Your own site:** public pages without a login only, for now.
+- **Records stay in your browser.** There are no accounts yet, so the ledger lives on one device.
+
 ## Where it's going
 
 - **Whole journeys, not just checkout:** sign-up, search, booking and account pages, on websites
