@@ -14,6 +14,7 @@ export const ALLOWED_PROPERTIES = [
   "border-width",
   "border-style",
   "outline",
+  "outline-offset",
   "font-size",
   "font-weight",
   "text-decoration",
@@ -33,6 +34,26 @@ const FUNCTION_CALL = /[a-z]\s*\(/i;
 const MAX_VALUE_LENGTH = 60;
 const MAX_LABEL_LENGTH = 80;
 const MAX_SELECTOR_LENGTH = 400;
+
+/** The only attributes a fix may set, each with the values it may take. */
+const ATTRIBUTE_RULES: Record<string, (value: string) => boolean> = {
+  tabindex: (value) => value === "0",
+  role: (value) => ["button", "link", "img"].includes(value),
+  "aria-label": (value) => value.length > 0 && value.length <= 120,
+  alt: (value) => value.length <= 160,
+  lang: (value) => /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(value),
+};
+
+function cleanAttributes(attributes: unknown): Record<string, string> {
+  const clean: Record<string, string> = {};
+  if (!attributes || typeof attributes !== "object") return clean;
+  for (const [name, value] of Object.entries(attributes)) {
+    if (typeof value !== "string") continue;
+    const trimmed = value.replace(/[\u0000-\u001f]/g, " ").trim();
+    if (ATTRIBUTE_RULES[name]?.(trimmed)) clean[name] = trimmed;
+  }
+  return clean;
+}
 
 /** Matches only the selectors the engine itself produces: ids and child steps. */
 const SAFE_SELECTOR = /^(body|#[\w\\-]+)( > ([a-z][a-z0-9]*(:nth-of-type\(\d+\))?|#[\w\\-]+))*$/;
@@ -62,7 +83,7 @@ export function sanitizeFix(fix: unknown): Fix | null {
   const css: CssChange[] = [];
   if (Array.isArray(input.css)) {
     for (const change of input.css) {
-      if (change?.target !== "element" && change?.target !== "placeholder") continue;
+      if (!["element", "placeholder", "focus"].includes(change?.target)) continue;
       const declarations = cleanDeclarations(change.declarations);
       if (Object.keys(declarations).length > 0) css.push({ target: change.target, declarations });
     }
@@ -73,11 +94,17 @@ export function sanitizeFix(fix: unknown): Fix | null {
       ? input.label.trim().slice(0, MAX_LABEL_LENGTH)
       : undefined;
 
-  if (css.length === 0 && !label) return null;
+  const attributes = cleanAttributes(input.attributes);
+  const hasAttributes = Object.keys(attributes).length > 0;
+  const keyboard = input.keyboard === true;
+
+  if (css.length === 0 && !label && !hasAttributes && !keyboard) return null;
   return {
     summary: typeof input.summary === "string" ? input.summary.slice(0, 200) : "Suggested fix",
     css: css.length > 0 ? css : undefined,
     label,
+    attributes: hasAttributes ? attributes : undefined,
+    keyboard: keyboard || undefined,
     source: input.source === "ai" ? "ai" : "rule",
   };
 }
@@ -97,7 +124,12 @@ export function sanitizeAppliedFix(applied: unknown): AppliedFix | null {
 }
 
 function rule(selector: string, change: CssChange, important: boolean): string {
-  const target = change.target === "placeholder" ? `${selector}::placeholder` : selector;
+  const target =
+    change.target === "placeholder"
+      ? `${selector}::placeholder`
+      : change.target === "focus"
+        ? `${selector}:focus-visible`
+        : selector;
   const body = Object.entries(change.declarations)
     .map(([property, value]) => `  ${property}: ${value}${important ? " !important" : ""};`)
     .join("\n");
@@ -116,6 +148,16 @@ export function fixToSnippet(selector: string, fix: Fix): string {
     parts.push(
       `<!-- Add a visible label above the field -->\n<label for="field-id">${fix.label}</label>\n<input id="field-id" … />`,
     );
+  }
+  if (fix.keyboard) {
+    parts.push(
+      `<!-- Use a real button. The keyboard can reach it and press it -->\n<button type="button">…</button>`,
+    );
+  } else if (fix.attributes) {
+    const list = Object.entries(fix.attributes)
+      .map(([name, value]) => `${name}="${value}"`)
+      .join(" ");
+    parts.push(`<!-- Add to the element -->\n${list}`);
   }
   const css = fixToCss(selector, fix);
   if (css) parts.push(css);
