@@ -14,6 +14,8 @@ export default defineConfig({
     command: `npx next start -p ${port}`,
     url: `http://localhost:${port}/store`,
     reuseExistingServer: true,
+    // Browser tests use Wick's built-in notes, so they never spend AI requests.
+    env: { SENTINEL_AI: "off" },
     timeout: 60_000,
   },
 });

@@ -2,16 +2,21 @@ import {
   composite,
   contrastRatio,
   contrastSeverity,
+  fixColour,
   formatRatio,
   requiredContrast,
+  toHex,
+  type Rgba,
 } from "@/lib/trial/contrast";
+import type { Evidence, Fix } from "@/lib/trial/types";
 import { backgroundBehind, effectiveOpacity, parseColour } from "../core/colour";
-import { cssPath, describe, fieldLabel, isIgnored, isVisible, textOf } from "../core/dom";
+import { cssPath, describe, isIgnored, isVisible, textOf, visibleLabel } from "../core/dom";
 import { isOnPath, keepWorst, type CheckContext, type CheckResult, type Located } from "./types";
 
 /**
  * Grandma Iris's checks: what a shopper with low vision runs into. Every
- * number comes from the browser's own computed styles.
+ * number comes from the browser's own computed styles, and every finding
+ * carries a fix computed from the same numbers.
  */
 
 const DISABLED =
@@ -19,6 +24,9 @@ const DISABLED =
 
 /** Smallest text size, in CSS pixels, that Iris can reasonably be asked to read. */
 const MIN_TEXT_PX = 12;
+
+/** Size the text-size fix raises small text to. */
+const FIXED_TEXT_PX = 14;
 
 /** Minimum contrast for the edge of a control against its surroundings (WCAG 1.4.11). */
 const CONTROL_CONTRAST = 3;
@@ -42,7 +50,7 @@ function textElements(): Element[] {
 }
 
 function fields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
-  const skip = new Set(["hidden", "submit", "button", "reset", "image"]);
+  const skip = new Set(["hidden", "submit", "button", "reset", "image", "checkbox", "radio"]);
   return Array.from(
     document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
       "input, textarea, select",
@@ -70,6 +78,33 @@ function located(
   };
 }
 
+function contrastEvidence(seen: Rgba, background: Rgba, ratio: number, required: number): Evidence {
+  return {
+    foreground: toHex(seen),
+    background: toHex(background),
+    ratio: Math.floor(ratio * 100) / 100,
+    required,
+  };
+}
+
+function colourFix(
+  target: "element" | "placeholder",
+  seen: Rgba,
+  background: Rgba,
+  required: number,
+): Fix {
+  const colour = fixColour(seen, background, required);
+  const hex = toHex(colour);
+  const what = target === "placeholder" ? "placeholder text" : "text";
+  const darker = colour.r + colour.g + colour.b < seen.r + seen.g + seen.b;
+  const direction = darker ? "Darken" : "Lighten";
+  return {
+    summary: `${direction} the ${what} to ${hex}, which gives ${formatRatio(contrastRatio(colour, background))}`,
+    css: [{ target, declarations: { color: hex } }],
+    source: "rule",
+  };
+}
+
 function contrastCheck(context: CheckContext): CheckResult {
   const findings: Located[] = [];
 
@@ -88,6 +123,8 @@ function contrastCheck(context: CheckContext): CheckResult {
         check: "iris.contrast",
         severity,
         measured: `Contrast ${formatRatio(ratio)}, needs ${required}:1`,
+        evidence: contrastEvidence(seen, background, ratio, required),
+        fix: colourFix("element", seen, background, required),
       }),
     );
   }
@@ -97,8 +134,8 @@ function contrastCheck(context: CheckContext): CheckResult {
     if (field instanceof HTMLSelectElement || !field.placeholder || field.value) continue;
     const background = backgroundBehind(field);
     if (!background) continue;
-    const colour = parseColour(getComputedStyle(field, "::placeholder").color);
-    const ratio = contrastRatio(composite(colour, background), background);
+    const seen = composite(parseColour(getComputedStyle(field, "::placeholder").color), background);
+    const ratio = contrastRatio(seen, background);
     const severity = contrastSeverity(ratio, 4.5);
     if (!severity) continue;
     findings.push(
@@ -106,6 +143,8 @@ function contrastCheck(context: CheckContext): CheckResult {
         check: "iris.contrast",
         severity,
         measured: `Placeholder contrast ${formatRatio(ratio)}, needs 4.5:1`,
+        evidence: contrastEvidence(seen, background, ratio, 4.5),
+        fix: colourFix("placeholder", seen, background, 4.5),
       }),
     );
   }
@@ -128,6 +167,12 @@ function textSizeCheck(context: CheckContext): CheckResult {
         check: "iris.text-size",
         severity: "major",
         measured: `Text is ${Math.round(size * 10) / 10}px, needs at least ${MIN_TEXT_PX}px`,
+        evidence: { fontSizePx: size },
+        fix: {
+          summary: `Raise the text size to ${FIXED_TEXT_PX}px`,
+          css: [{ target: "element", declarations: { "font-size": `${FIXED_TEXT_PX}px` } }],
+          source: "rule",
+        },
       }),
     );
   }
@@ -139,17 +184,34 @@ function textSizeCheck(context: CheckContext): CheckResult {
   };
 }
 
+/** A readable label for a field that has none, taken from its own hints. */
+function suggestedLabel(field: Element): string {
+  const hint =
+    field.getAttribute("placeholder") ||
+    field.getAttribute("aria-label") ||
+    field.getAttribute("name") ||
+    "Label";
+  const words = hint.replace(/[_-]+/g, " ").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 function labelCheck(context: CheckContext): CheckResult {
   const findings: Located[] = [];
   for (const field of fields()) {
-    if (fieldLabel(field)) continue;
+    if (visibleLabel(field)) continue;
+    const label = suggestedLabel(field);
     findings.push(
       located(field, context, {
         check: "iris.labels",
         severity: "major",
         measured: field.getAttribute("placeholder")
-          ? "No label. The only hint is a placeholder, which disappears once typing starts"
-          : "No label",
+          ? "No visible label. The only hint is a placeholder, which disappears once typing starts"
+          : "No visible label",
+        fix: {
+          summary: `Add a visible label, "${label}", above the field`,
+          label,
+          source: "rule",
+        },
       }),
     );
   }
@@ -181,17 +243,31 @@ function buttonCheck(context: CheckContext): CheckResult {
     const around = element.parentElement ? backgroundBehind(element.parentElement) : null;
     if (!around) continue;
 
-    const fillRatio = contrastRatio(composite(own, around), around);
+    const fill = composite(own, around);
+    const fillRatio = contrastRatio(fill, around);
     if (fillRatio >= CONTROL_CONTRAST) continue;
     const borderWidth = parseFloat(style.borderTopWidth);
     const border = composite(parseColour(style.borderTopColor), around);
     if (borderWidth >= 1 && contrastRatio(border, around) >= CONTROL_CONTRAST) continue;
 
+    // The fix outlines the button in a deeper shade of its own colour.
+    const edge = toHex(fixColour(fill, around, CONTROL_CONTRAST));
     findings.push(
       located(element, context, {
         check: "iris.button",
         severity: "major",
         measured: `Button stands out from the page by only ${formatRatio(fillRatio)}, needs ${CONTROL_CONTRAST}:1`,
+        evidence: {
+          foreground: toHex(fill),
+          background: toHex(around),
+          ratio: Math.floor(fillRatio * 100) / 100,
+          required: CONTROL_CONTRAST,
+        },
+        fix: {
+          summary: `Give the button a 2px border in ${edge} so its edge is visible`,
+          css: [{ target: "element", declarations: { border: `2px solid ${edge}` } }],
+          source: "rule",
+        },
       }),
     );
   }

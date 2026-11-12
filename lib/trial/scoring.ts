@@ -60,6 +60,8 @@ export type CharacterSummary = {
   coinsLeft: number;
   snags: Extract<TrialEvent, { type: "snag" }>[];
   passes: Extract<TrialEvent, { type: "pass" }>[];
+  /** Snags from the previous trial that were gone in this one. */
+  fixed: Extract<TrialEvent, { type: "fixed" }>[];
   abandonedAt?: string;
   orderId?: string;
 };
@@ -78,6 +80,7 @@ export function summarize(events: readonly TrialEvent[]): CharacterSummary[] {
         coinsLeft: 0,
         snags: [],
         passes: [],
+        fixed: [],
       };
       byCharacter.set(event.character, summary);
     }
@@ -87,6 +90,9 @@ export function summarize(events: readonly TrialEvent[]): CharacterSummary[] {
         break;
       case "pass":
         summary.passes.push(event);
+        break;
+      case "fixed":
+        summary.fixed.push(event);
         break;
       case "purchase":
         summary.orderId = event.orderId;

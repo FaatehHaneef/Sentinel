@@ -22,6 +22,7 @@ const runConfigSchema = z.object({
   pace: z.enum(["normal", "fast"]),
   origin: z.url(),
   kind: z.enum(["own", "verified"]),
+  previousRunId: z.uuid().optional(),
 });
 
 export async function createLaunchToken(

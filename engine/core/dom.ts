@@ -66,6 +66,24 @@ export function fieldLabel(field: Element): string {
   return field.getAttribute("title")?.trim() ?? "";
 }
 
+/**
+ * The label a sighted person can see for a field: a visible <label>, or
+ * visible text the field points to. An `aria-label` or tooltip does not
+ * count here, because it is not on the screen.
+ */
+export function visibleLabel(field: Element): string {
+  const candidates: Element[] = Array.from((field as HTMLInputElement).labels ?? []);
+  for (const id of (field.getAttribute("aria-labelledby") ?? "").split(/\s+/)) {
+    const target = id ? document.getElementById(id) : null;
+    if (target) candidates.push(target);
+  }
+  for (const candidate of candidates) {
+    const text = textOf(candidate);
+    if (text && isVisible(candidate)) return text;
+  }
+  return "";
+}
+
 /** A short description of an element, in words a shop owner would use. */
 export function describe(element: Element): string {
   const tag = element.tagName.toLowerCase();

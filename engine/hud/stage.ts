@@ -22,6 +22,11 @@ type Particle = {
   gravity: number;
 };
 
+/** A faint figure standing where the character struggled in the previous trial. */
+type Ghost = { element: Element; alpha: number; fading: boolean };
+
+const GHOST_ALPHA = 0.38;
+
 const WALK_SPEED = 300; // CSS pixels per second of trial time
 export const SPRITE_SCALE = 3;
 
@@ -41,6 +46,8 @@ export class Stage {
   private animation: Animation = "idle";
   private animationClock = 0;
   private particles: Particle[] = [];
+  private ghosts: Ghost[] = [];
+  private spotFor: ((element: Element) => { x: number; y: number }) | null = null;
   private arrived: (() => void) | null = null;
   private last = performance.now();
   private frame = 0;
@@ -72,6 +79,23 @@ export class Stage {
     if (this.animation !== animation) {
       this.animation = animation;
       this.animationClock = 0;
+    }
+  }
+
+  /** Tells the stage where a character stands for a given element. */
+  setSpotResolver(resolver: (element: Element) => { x: number; y: number }): void {
+    this.spotFor = resolver;
+  }
+
+  /** Shows ghosts beside the elements where the last trial hit a snag. */
+  setGhosts(elements: Element[]): void {
+    this.ghosts = elements.map((element) => ({ element, alpha: GHOST_ALPHA, fading: false }));
+  }
+
+  /** Lets the ghost at an element fade away. */
+  releaseGhost(element: Element): void {
+    for (const ghost of this.ghosts) {
+      if (ghost.element === element) ghost.fading = true;
     }
   }
 
@@ -182,6 +206,11 @@ export class Stage {
       particle.life -= dt;
     }
     this.particles = this.particles.filter((particle) => particle.life > 0);
+
+    for (const ghost of this.ghosts) {
+      if (ghost.fading) ghost.alpha -= dt * 0.9;
+    }
+    this.ghosts = this.ghosts.filter((ghost) => ghost.alpha > 0 && ghost.element.isConnected);
   }
 
   private currentFrame(): HTMLCanvasElement | null {
@@ -200,6 +229,23 @@ export class Stage {
     const width = this.sprite.width * SPRITE_SCALE;
     const height = this.sprite.height * SPRITE_SCALE;
     const bob = this.animation === "walk" && Math.floor(this.animationClock * 8) % 2 ? -2 : 0;
+
+    // Ghosts of the previous trial, drawn first so the character walks in front of them.
+    const ghostFrame = this.sprite.frames.squint ?? frame;
+    if (this.spotFor) {
+      for (const ghost of this.ghosts) {
+        const spot = this.spotFor(ghost.element);
+        context.globalAlpha = ghost.alpha;
+        context.drawImage(
+          ghostFrame,
+          Math.round(spot.x - width / 2),
+          Math.round(spot.y - height),
+          width,
+          height,
+        );
+      }
+      context.globalAlpha = 1;
+    }
 
     // Soft shadow under the feet so the character reads against any page.
     context.fillStyle = "rgba(18, 21, 42, 0.28)";

@@ -60,3 +60,54 @@ export function contrastSeverity(ratio: number, required: number): Severity | nu
 export function formatRatio(ratio: number): string {
   return `${(Math.floor(ratio * 10) / 10).toFixed(1)}:1`;
 }
+
+export function toHex(colour: Rgba): string {
+  const part = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)))
+      .toString(16)
+      .padStart(2, "0");
+  return `#${part(colour.r)}${part(colour.g)}${part(colour.b)}`;
+}
+
+/** Reads #rgb or #rrggbb. Returns null for anything else. */
+export function fromHex(hex: string): Rgba | null {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!match) return null;
+  const digits =
+    match[1].length === 3
+      ? match[1]
+          .split("")
+          .map((digit) => digit + digit)
+          .join("")
+      : match[1];
+  return {
+    r: parseInt(digits.slice(0, 2), 16),
+    g: parseInt(digits.slice(2, 4), 16),
+    b: parseInt(digits.slice(4, 6), 16),
+    a: 1,
+  };
+}
+
+/** A small margin above the requirement, so a fix does not sit on the edge. */
+const FIX_MARGIN = 0.15;
+
+/**
+ * The nearest colour to `colour` that reaches `required` contrast against
+ * `background`. It keeps the hue and moves towards black on a light
+ * background or towards white on a dark one, stopping at the first shade
+ * that passes.
+ */
+export function fixColour(colour: Rgba, background: Rgba, required: number): Rgba {
+  const end = luminance(background) > 0.18 ? 0 : 255;
+  for (let step = 0; step <= 50; step++) {
+    const t = step / 50;
+    const candidate: Rgba = {
+      r: Math.round(colour.r + (end - colour.r) * t),
+      g: Math.round(colour.g + (end - colour.g) * t),
+      b: Math.round(colour.b + (end - colour.b) * t),
+      a: 1,
+    };
+    if (contrastRatio(candidate, background) >= required + FIX_MARGIN) return candidate;
+  }
+  return { r: end, g: end, b: end, a: 1 };
+}

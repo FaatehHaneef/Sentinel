@@ -17,6 +17,8 @@ export type EngineCharacter = {
   greeting: string;
   onPurchase: string;
   onAbandon: string;
+  /** Said on a re-run, at a place that was a snag last time and is not any more. */
+  onFixed: string;
   /** Details the character types at checkout. */
   shopper: { name: string; email: string };
 };
