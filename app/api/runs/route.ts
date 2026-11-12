@@ -16,6 +16,8 @@ const createRunSchema = z.object({
     .refine((party) => new Set(party).size === party.length, "Each character can join once.")
     .refine((party) => party.every((id) => READY.includes(id)), "That character is not ready yet."),
   pace: z.enum(["normal", "fast"]).default("normal"),
+  /** Set when re-running with fixes chosen from an earlier trial. */
+  previousRunId: z.uuid().optional(),
 });
 
 /**
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     pace: parsed.data.pace,
     origin: decision.origin,
     kind: "own",
+    previousRunId: parsed.data.previousRunId,
   };
   const token = await createLaunchToken(config, getTokenSecret());
 
