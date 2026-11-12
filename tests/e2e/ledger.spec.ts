@@ -10,9 +10,12 @@ test("the ledger lists snags across trials and marks what was fixed", async ({ p
   const { startUrl } = (await created.json()) as { startUrl: string };
   await page.goto(startUrl);
   await page.getByRole("link", { name: "See the full results" }).click({ timeout: 90_000 });
-  await page.getByRole("button", { name: /Try 1 fix and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try 1 fix and run the trial again/ })
+    .first()
+    .click();
   await page.getByRole("link", { name: "See the full results" }).click({ timeout: 150_000 });
-  await page.getByRole("link", { name: "The ledger" }).click();
+  await page.getByRole("link", { name: "The ledger" }).first().click();
 
   await expect(page.getByRole("heading", { name: "The ledger" })).toBeVisible();
   const grid = page.getByRole("treegrid").or(page.getByRole("grid")).first();

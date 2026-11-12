@@ -49,7 +49,8 @@ export class Stage {
   private animation: Animation = "idle";
   private animationClock = 0;
   private particles: Particle[] = [];
-  private ghosts: Ghost[] = [];
+  private ghost: Ghost | null = null;
+  private ghostCanvas: HTMLCanvasElement | null = null;
   private spotFor: ((element: Element) => { x: number; y: number }) | null = null;
   private arrived: (() => void) | null = null;
   private last = performance.now();
@@ -90,16 +91,34 @@ export class Stage {
     this.spotFor = resolver;
   }
 
-  /** Shows ghosts beside the elements where the last trial hit a snag. */
-  setGhosts(elements: Element[]): void {
-    this.ghosts = elements.map((element) => ({ element, alpha: GHOST_ALPHA, fading: false }));
+  /**
+   * On a re-run, shows where the character struggled last time: one faint,
+   * blue figure a step behind the spot being checked now, tagged "last time".
+   * Only one is ever shown.
+   */
+  showGhost(element: Element | null): void {
+    this.ghost = element ? { element, alpha: GHOST_ALPHA, fading: false } : null;
   }
 
   /** Lets the ghost at an element fade away. */
   releaseGhost(element: Element): void {
-    for (const ghost of this.ghosts) {
-      if (ghost.element === element) ghost.fading = true;
-    }
+    if (this.ghost?.element === element) this.ghost.fading = true;
+  }
+
+  /** The character's worried frame, tinted ghostly blue. */
+  private ghostImage(frame: HTMLCanvasElement): HTMLCanvasElement {
+    const canvas = (this.ghostCanvas ??= document.createElement("canvas"));
+    canvas.width = frame.width;
+    canvas.height = frame.height;
+    const context = canvas.getContext("2d");
+    if (!context) return frame;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(frame, 0, 0);
+    context.globalCompositeOperation = "source-atop";
+    context.fillStyle = "rgba(143, 200, 255, 0.75)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.globalCompositeOperation = "source-over";
+    return canvas;
   }
 
   /** Puts the character just off the left edge, ready to walk in. */
@@ -226,10 +245,10 @@ export class Stage {
     }
     this.particles = this.particles.filter((particle) => particle.life > 0);
 
-    for (const ghost of this.ghosts) {
-      if (ghost.fading) ghost.alpha -= dt * 0.9;
+    if (this.ghost) {
+      if (this.ghost.fading) this.ghost.alpha -= dt * 0.9;
+      if (this.ghost.alpha <= 0 || !this.ghost.element.isConnected) this.ghost = null;
     }
-    this.ghosts = this.ghosts.filter((ghost) => ghost.alpha > 0 && ghost.element.isConnected);
   }
 
   private currentFrame(): HTMLCanvasElement | null {
@@ -249,20 +268,21 @@ export class Stage {
     const height = this.sprite.height * SPRITE_SCALE;
     const bob = this.animation === "walk" && Math.floor(this.animationClock * 8) % 2 ? -2 : 0;
 
-    // Ghosts of the previous trial, drawn first so the character walks in front of them.
-    const ghostFrame = this.sprite.frames.worry ?? frame;
-    if (this.spotFor) {
-      for (const ghost of this.ghosts) {
-        const spot = this.spotFor(ghost.element);
-        context.globalAlpha = ghost.alpha;
-        context.drawImage(
-          ghostFrame,
-          Math.round(spot.x - width / 2),
-          Math.round(spot.y - height),
-          width,
-          height,
-        );
-      }
+    // The ghost of the last trial, drawn first and a step behind, so the character stands in front of it.
+    if (this.ghost && this.spotFor) {
+      const spot = this.spotFor(this.ghost.element);
+      // On the far side of the spot, away from the card, so it is never hidden behind it.
+      const x = Math.round(spot.x - width / 2 + 40);
+      const y = Math.round(spot.y - height);
+      context.globalAlpha = this.ghost.alpha;
+      context.drawImage(this.ghostImage(this.sprite.frames.worry ?? frame), x, y, width, height);
+      context.font = "bold 11px ui-monospace, Consolas, monospace";
+      context.textAlign = "center";
+      context.fillStyle = "rgba(18, 21, 42, 0.85)";
+      context.fillRect(x + width / 2 - 34, y - 18, 68, 15);
+      context.fillStyle = "#cfe8ff";
+      context.fillText("last time", x + width / 2, y - 7);
+      context.textAlign = "start";
       context.globalAlpha = 1;
     }
 

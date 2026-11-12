@@ -68,7 +68,10 @@ test("Tobin cannot use the tiny quantity control, then buys two candles once it 
   // Try the fixes and send him again.
   await page.getByRole("link", { name: "See the full results" }).click();
   await expect(page.getByText('Tobin left at "Cart" without buying')).toBeVisible();
-  await page.getByRole("button", { name: /Try \d+ fixes and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try \d+ fixes and run the trial again/ })
+    .first()
+    .click();
   await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });
 

@@ -23,7 +23,10 @@ function describeEvents(record: RunRecord): string {
 
 async function tryFixes(page: Page): Promise<RunRecord> {
   await page.getByRole("link", { name: "See the full results" }).click();
-  await page.getByRole("button", { name: /Try \d+ fix(es)? and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try \d+ fix(es)? and run the trial again/ })
+    .first()
+    .click();
   await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });
   const record = await latestRecord(page);

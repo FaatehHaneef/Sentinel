@@ -52,7 +52,10 @@ test("Cog cannot buy without product data, then its agent orders once the data i
   });
 
   await page.getByRole("link", { name: "See the full results" }).click();
-  await page.getByRole("button", { name: /Try 1 fix and run the trial again/ }).click();
+  await page
+    .getByRole("button", { name: /Try 1 fix and run the trial again/ })
+    .first()
+    .click();
   await expect(page.locator("sentinel-hud")).toBeAttached({ timeout: 30_000 });
   await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });
   const second = await latestRecord(page);

@@ -27,7 +27,7 @@ export function RevenueInputsForm({
     "mt-1 w-full rounded border-2 border-slate bg-night px-3 py-2 text-lg text-parchment";
   const number = (value: string) => Math.max(0, Number(value) || 0);
   return (
-    <section className="rounded-lg border-2 border-slate bg-indigo/80 p-6">
+    <section className="pixel-panel">
       <h2 className="font-display text-2xl font-bold text-parchment">Your shop&apos;s numbers</h2>
       <p className="mt-2 max-w-2xl text-mist">
         The money estimates on this page use these three numbers. The starting values are

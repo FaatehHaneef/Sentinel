@@ -40,10 +40,7 @@ export function StoreProgress({ runId }: { runId?: string }) {
   const progress = level.next === null ? 1 : (level.xp - level.from) / span;
 
   return (
-    <section
-      className="rounded-lg border-2 border-amber/60 bg-indigo/80 p-6"
-      aria-label="Store progress"
-    >
+    <section className="pixel-panel lit" aria-label="Store progress">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-display text-sm uppercase tracking-widest text-amber">Store level</p>
