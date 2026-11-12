@@ -35,7 +35,7 @@ button[hidden] { display: none; }
   transition: top 220ms ease-out, left 220ms ease-out, right 220ms ease-out, bottom 220ms ease-out;
   display: flex; flex-direction: column; gap: 10px; padding: 12px;
   background: #1b1f3b; border: 3px solid #ffb347; border-radius: 6px;
-  box-shadow: 0 6px 0 #12152a, 0 12px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 6px 6px 0 #12152a, 0 14px 30px rgba(0, 0, 0, 0.4);
   pointer-events: auto;
 }
 .panel[data-corner="top-right"] { top: 12px; right: 12px; }
@@ -111,7 +111,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #ffb347; outline-offs
 .summary .earned { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .summary .earned li { color: #ffe08a; font-weight: 700; font-size: 13px; }
 .panel.tucked .summary .earned { display: none; }
-.summary a { align-self: flex-start; background: #ffb347; color: #1b1f3b; border-color: #ffb347; font-size: 13px; }
+.summary a {
+  display: block; align-self: stretch; text-align: center; padding: 10px 9px;
+  background: #ffb347; color: #1b1f3b; border-color: #ffe08a; font-size: 14px;
+}
 @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 @media (max-width: 720px) {
   .panel, .panel[data-corner] { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 46%; }
