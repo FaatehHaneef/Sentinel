@@ -76,3 +76,27 @@ test("Pell leaves a page that is too heavy, then buys once the banner is fixed",
   // The store fix lasts one trial: afterwards the demo store is back to how it was.
   expect(await page.evaluate(() => window.localStorage.getItem("tallowmere-fixes"))).toBeNull();
 });
+
+test("Pell still finds the heavy banner when the browser already has it", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(240_000);
+  // Iris walks first, so the banner is already in this browser's cache when Pell arrives.
+  const created = await request.post("/api/runs", {
+    data: { party: ["iris", "pell"], pace: "fast" },
+  });
+  const { startUrl } = (await created.json()) as { startUrl: string };
+  await page.goto(startUrl);
+  await page.getByRole("link", { name: "See the full results" }).waitFor({ timeout: 150_000 });
+  const record = await latestRecord(page);
+  const pell = record.events.filter((event) => event.character === "pell");
+  console.log(describeEvents({ ...record, events: pell }));
+  const heavy = pell.find(
+    (event) => event.type === "snag" && event.finding.check === "pell.heavy-images",
+  );
+  expect(heavy && "finding" in heavy ? heavy.finding.measured : "").toMatch(
+    /This picture is 1\.\d MB/,
+  );
+  expect(pell.find((event) => event.type === "finish")).toMatchObject({ outcome: "abandoned" });
+});

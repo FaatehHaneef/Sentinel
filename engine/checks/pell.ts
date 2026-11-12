@@ -32,8 +32,30 @@ const OURS = /\/v\.js|sentinel-engine\.js|\/api\/runs|\/api\/verdict/;
 
 let measuredThisPageLoad = false;
 
+/**
+ * What a first-time visitor downloads for this entry. An entry with no body
+ * size came from this browser's cache, perhaps after checking with the
+ * server, and its transfer size is only headers: its real size is unknown
+ * here (0), and is read from the file instead where that matters.
+ */
 function bytes(entry: PerformanceResourceTiming | PerformanceNavigationTiming): number {
-  return Math.max(entry.transferSize || 0, entry.encodedBodySize || 0);
+  if (!entry.encodedBodySize) return 0;
+  return Math.max(entry.transferSize || 0, entry.encodedBodySize);
+}
+
+/**
+ * The size of a same-site file, read from this browser's cache where it can
+ * be. Used for pictures the browser already had, which it reports as
+ * weighing nothing. Returns 0 for other sites' files, which cannot be read.
+ */
+async function fileSize(url: string): Promise<number> {
+  try {
+    if (new URL(url, window.location.href).origin !== window.location.origin) return 0;
+    const response = await fetch(url, { cache: "force-cache" });
+    return response.ok ? (await response.blob()).size : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function size(value: number): string {
@@ -188,20 +210,43 @@ export async function runPellChecks(context: CheckContext): Promise<CheckResult[
       entry.initiatorType !== "fetch" &&
       entry.initiatorType !== "xmlhttprequest",
   );
-  const total =
-    (navigation ? bytes(navigation) : 0) + resources.reduce((sum, entry) => sum + bytes(entry), 0);
-  const requests = resources.length + 1;
-  const seconds = projectedWait(total, requests);
+  // The heaviest pictures, which are usually the cause. A picture this browser
+  // already had may be reported as weighing nothing, so its size is read from
+  // the file itself: Pell is a first-time visitor and downloads all of it.
+  const pictures = (
+    await Promise.all(
+      Array.from(document.images)
+        .filter((image) => !isIgnored(image) && isVisible(image) && image.currentSrc)
+        .map(async (image) => {
+          const entry = performance.getEntriesByName(image.currentSrc)[0] as
+            PerformanceResourceTiming | undefined;
+          const reported = entry ? bytes(entry) : 0;
+          return {
+            image,
+            weight: reported || (await fileSize(image.currentSrc)),
+            listed: Boolean(entry),
+          };
+        }),
+    )
+  ).sort((a, b) => b.weight - a.weight);
 
-  // The heaviest pictures, which are usually the cause.
-  const pictures = Array.from(document.images)
-    .filter((image) => !isIgnored(image) && isVisible(image))
-    .map((image) => {
-      const entry = performance.getEntriesByName(image.currentSrc)[0] as
-        PerformanceResourceTiming | undefined;
-      return { image, weight: entry ? bytes(entry) : 0 };
-    })
-    .sort((a, b) => b.weight - a.weight);
+  const listedPictures = new Set(
+    pictures.filter((picture) => picture.listed).map((p) => p.image.currentSrc),
+  );
+  const pictureWeight = new Map(
+    pictures.map((picture) => [picture.image.currentSrc, picture.weight]),
+  );
+  const unlisted = pictures.filter((picture) => !listedPictures.has(picture.image.currentSrc));
+
+  const total =
+    (navigation ? bytes(navigation) : 0) +
+    resources.reduce(
+      (sum, entry) => sum + (bytes(entry) || pictureWeight.get(entry.name) || 0),
+      0,
+    ) +
+    unlisted.reduce((sum, picture) => sum + picture.weight, 0);
+  const requests = resources.length + unlisted.length + 1;
+  const seconds = projectedWait(total, requests);
 
   for (const { image, weight } of pictures) {
     if (weight < HEAVY_IMAGE) continue;
