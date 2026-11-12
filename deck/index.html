@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sentinel: The Checkout Trials</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="deck.css" />
+  </head>
+  <body>
+    <main class="deck" aria-roledescription="slide deck">
+      <!-- 1. Title -->
+      <section class="slide title-slide" aria-label="Sentinel">
+        <img class="backdrop" src="assets/banner.png" alt="" />
+        <div class="title-copy">
+          <p class="kicker">The Checkout Trials</p>
+          <h1>Sentinel</h1>
+          <p class="lead">
+            Your checkout isn't broken.<br />It's just broken for someone you've never met.
+          </p>
+          <p class="note">Built for the PayPal AI Hackathon · Braintree sandbox · Gemini</p>
+        </div>
+      </section>
+
+      <!-- 2. The problem -->
+      <section class="slide" aria-label="The problem">
+        <p class="kicker">The problem</p>
+        <h2>Shops are built on fast laptops by people with steady hands and good eyes.</h2>
+        <div class="three">
+          <div class="card">
+            <h3>Low vision</h3>
+            <p>A shopper with low vision can't read pale text.</p>
+          </div>
+          <div class="card">
+            <h3>Slow signal</h3>
+            <p>A shopper on one bar of signal gives up on a heavy page.</p>
+          </div>
+          <div class="card">
+            <h3>No mouse</h3>
+            <p>A shopper without a mouse can't reach a fake button.</p>
+          </div>
+        </div>
+        <p class="closing">
+          They leave quietly. The shop owner only ever sees a lower sales number, never why.
+        </p>
+      </section>
+
+      <!-- 3. The idea -->
+      <section class="slide split" aria-label="The idea">
+        <div>
+          <p class="kicker">The idea</p>
+          <h2>Don't read a report. Watch them try to buy from you.</h2>
+          <p>
+            Sentinel sends seven pixel-art shoppers through a real checkout. Each one stands for a
+            real kind of customer, checks the page the way that customer would, and reacts when
+            something gets in the way.
+          </p>
+          <p>Every problem costs coins from their purse. Lose too much patience, lose the sale.</p>
+        </div>
+        <figure>
+          <img
+            src="assets/lobby-circle.png"
+            alt="The Sentinel lobby: seven pixel shoppers in a circle"
+          />
+        </figure>
+      </section>
+
+      <!-- 4. The cast -->
+      <section class="slide" aria-label="Meet the shoppers">
+        <p class="kicker">Meet the shoppers</p>
+        <h2>Seven kinds of customer. 29 checks between them.</h2>
+        <p>Pick who goes. Each one checks the page the way that customer would.</p>
+        <figure class="wide tall" style="--focus: 72%">
+          <img
+            src="assets/lobby-line.png"
+            alt="The shoppers standing in a line, ready to be chosen"
+          />
+        </figure>
+      </section>
+
+      <!-- 5. The trial -->
+      <section class="slide split" aria-label="A trial">
+        <figure>
+          <img
+            src="assets/trial.png"
+            alt="Grandma Iris on a checkout page, a faint field outlined in red"
+          />
+        </figure>
+        <div>
+          <p class="kicker">A trial</p>
+          <h2>They walk the real page.</h2>
+          <ul>
+            <li>Every number is measured by the browser on the live page.</li>
+            <li>The shopper walks to each problem, reacts, and loses coins.</li>
+            <li>The checkout is a real Braintree sandbox payment.</li>
+          </ul>
+          <p class="stat">
+            <span data-count="1.6">1.6</span>:1
+            <small>contrast on the checkout button, where 4.5:1 is needed</small>
+          </p>
+        </div>
+      </section>
+
+      <!-- 6. Every kind of shopper -->
+      <section class="slide two-shots" aria-label="Different shoppers, different problems">
+        <p class="kicker">Different shoppers, different problems</p>
+        <h2>Each one fails your checkout in a different way.</h2>
+        <div class="shots">
+          <figure>
+            <img
+              src="assets/taps.png"
+              alt="Tobin at the cart, red and green dots showing where his shaky taps landed"
+            />
+            <figcaption>
+              Tobin: 20 simulated shaky taps at a tiny button. Red dots missed.
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="assets/phone.png"
+              alt="Dash's phone view beside the store, a popup covering the screen"
+            />
+            <figcaption>
+              Dash: a popup covers the phone screen before a single candle shows.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 7. The results -->
+      <section class="slide split" aria-label="What it costs">
+        <div>
+          <p class="kicker">What it costs</p>
+          <h2>Plain words first. Detail when you want it.</h2>
+          <ul>
+            <li>Who bought, who left, and where.</li>
+            <li>The worst problems, in plain words.</li>
+            <li>An estimate of money at risk each month.</li>
+            <li>An AI verdict from Gemini, written from the measurements.</li>
+          </ul>
+          <p class="stat">
+            $<span data-count="735">735</span>
+            <small
+              >a month at risk from Grandma Iris alone, in the run pictured (an estimate, with its
+              assumptions shown)</small
+            >
+          </p>
+        </div>
+        <figure>
+          <img src="assets/results.png" alt="The results summary for three shoppers" />
+        </figure>
+      </section>
+
+      <!-- 8. Fix and run again -->
+      <section class="slide split" aria-label="Fix it and run again">
+        <div>
+          <p class="kicker">Fix it and run again</p>
+          <h2>Every problem comes with a fix. Try it, and send them again.</h2>
+          <div class="before-after">
+            <p class="label">Grandma Iris</p>
+            <p>
+              <span class="from"><span data-count="9">9</span> problems, sale lost</span> →
+              <span class="to">0 problems, sale made</span>
+            </p>
+            <p class="label">Pell</p>
+            <p>
+              <span class="from">about <span data-count="15">15</span> seconds to load</span> →
+              <span class="to">about 4</span>
+            </p>
+            <p class="label">Cog</p>
+            <p>
+              <span class="from">can't read the product</span> →
+              <span class="to">buys by itself</span>
+            </p>
+          </div>
+        </div>
+        <figure>
+          <img
+            src="assets/rerun.png"
+            alt="Grandma Iris on the re-run: a fixed problem marked with a star, all 180 coins kept"
+          />
+        </figure>
+      </section>
+
+      <!-- 9. Built on PayPal and AI -->
+      <section class="slide" aria-label="How it works">
+        <p class="kicker">How it works</p>
+        <h2>PayPal and AI do real work.</h2>
+        <div class="three">
+          <div class="card">
+            <h3>Braintree sandbox</h3>
+            <p>
+              Real orders with line items, prices set on the server, declines, double-submit
+              protection, and verified webhooks.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Gemini</h3>
+            <p>
+              Writes each verdict from the measurements. Cog's agent decides whether to buy.
+              Suggested colours must pass the contrast maths.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Safe by design</h3>
+            <p>
+              Runs only on our demo store or sites whose owner added one line. Sandbox only. On
+              owners' sites, shoppers only look.
+            </p>
+          </div>
+        </div>
+        <ol class="flow" aria-label="The flow of a trial">
+          <li>Pick shoppers</li>
+          <li>They walk the page</li>
+          <li>Measured checks</li>
+          <li>Braintree sandbox sale</li>
+          <li>Gemini verdict</li>
+          <li>Try the fixes</li>
+          <li>Run again</li>
+        </ol>
+      </section>
+
+      <!-- 10. Who it's for -->
+      <section class="slide" aria-label="Who it's for">
+        <p class="kicker">Who it's for</p>
+        <div class="three">
+          <div class="card">
+            <h3>A small shop owner</h3>
+            <p>Send all seven before the first customer arrives.</p>
+          </div>
+          <div class="card">
+            <h3>An agency</h3>
+            <p>Paste one line into a client's site and hand over a clear list of fixes.</p>
+          </div>
+          <div class="card">
+            <h3>A developer</h3>
+            <p>Try fixes in seconds and re-run before every release.</p>
+          </div>
+        </div>
+        <figure class="wide">
+          <img
+            src="assets/ledger.png"
+            alt="The ledger: every problem across trials in a sortable table"
+          />
+        </figure>
+      </section>
+
+      <!-- 11. Close -->
+      <section class="slide title-slide" aria-label="Try it">
+        <img class="backdrop" src="assets/banner.png" alt="" />
+        <div class="title-copy">
+          <p class="kicker">Try it</p>
+          <h1>Sentinel</h1>
+          <p class="lead">sentinel-ten-ashy.vercel.app</p>
+          <p class="note">github.com/FaatehHaneef/Sentinel · MIT licence</p>
+        </div>
+      </section>
+    </main>
+    <p class="counter" aria-live="polite"></p>
+    <script src="deck.js"></script>
+  </body>
+</html>
